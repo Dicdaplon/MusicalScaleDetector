@@ -8,64 +8,81 @@ import numpy as np
 from scipy.io import wavfile
 import scipy.io
 
+from FFTfunction import *
+
 
 
 def note_frequencies_construct():
     gamme = np.zeros(12)
     gamme[0] = 32.7  # C (Do) at 32.7 Hz
 
-    for i in range(1, len(gamme)):
+    for i in range(1, len(gamme)): #construct every note in a chromatic scale
         gamme[i] = 1.05946 * gamme[i - 1]
     return gamme
 
 
-def frequence_to_index(frequence, octave, freqaxe, rate):
-    Freqind = frequence * np.power(2, octave)  # look for the selected freq and octave equivalent
-    Freqind = Freqind + freqaxe[0]  # add starting frequency as constant, fix for trunc function
-    Freqind = Freqind * len(freqaxe) / rate
-    return Freqind
+def frequence_to_index(frequence, octave, freqaxe,rate):
+    freq_ind = frequence * np.power(2, octave)  # look for the selected freq and octave
+    freq_ind = freq_ind + freqaxe[0]  # add a starting frequency as constant, fix for trunc function
+    freq_ind = freq_ind * len(freqaxe) / rate  #transform frequence into indexes
+    freq_ind=int(np.round(freq_ind))
+    return freq_ind
 
 
-def NoteScore(spectre, freq, note, windows):  # return summed score for a note C,Cd,D...
+def note_score(spectre, freq,rate, note, windows):  # return summed score for a note C,Cd,D...
     listscale = ["C", "Cd", "D", "Dd", "E", "F", "Fd", "G", "Gd", "A", "Ad", "B"]
     gamme = note_frequencies_construct()  # all the normalize value, C to B (Do vers Si) in Hz
 
     noteindex = listscale.index(note)  # reach for the indexes of the searched note (ex Cd -> 1)
     powerscale = 0
     n = noteindex;
-    spectre = spectre / max(spectre)
+    np.max(spectre)
+    spectre = spectre / np.max(spectre)
     for i in range(0, 6):
-        Freqind = frequence_to_index(gamme[n], i, freq, rate)
-        moyennage = np.mean(spectre[round(Freqind) - windows:round(Freqind) + windows + 1])
+        freq_ind = frequence_to_index(gamme[n], i, freq,rate)
+        moyennage = np.mean(spectre[freq_ind - windows:freq_ind + windows + 1]) #maybe be not usefull...
         powerscale = powerscale + moyennage
     return powerscale
 
 
-def ChordsScores(spectre, freq, windows):  # return vector of summed scores for each grade C,Cd,D...
+def score_for_everynote(spectre, freq,rate, windows):  # return vector of summed scores for each note C,Cd,D...
     powersvector = np.zeros(12);
     listscale = ["C", "Cd", "D", "Dd", "E", "F", "Fd", "G", "Gd", "A", "Ad", "B"]
     n = 0
     for note in listscale:
-        powersvector[n] = NoteScore(spectre, freq, note, 30)
+        powersvector[n] = note_score(spectre, freq,rate, note, 30)
         n = n + 1
     return powersvector
 
+def compare_with_known_scale (Scalein):
+    listscale = ["C", "Cd", "D", "Dd", "E", "F", "Fd", "G", "Gd", "A", "Ad", "B"]
+    scoremax=0
+    nmax=0
+    for n in range(0,len(listscale)):
+        print("compare with", listscale[n])
+        refscale=np.add([0,2,4,5,7,9,11],[n,n,n,n,n,n,n])
+        refscale=circularyscale(refscale)
+        newscore=compare_vector(Scalein,refscale)
+        print("refscale", refscale, "ourscale", Scalein)
+        print(" newscore",  newscore)
+        if (newscore > scoremax):
+            scoremax=newscore
+            nmax=n
 
-def BoolReturn(a, b):  # compare 2 scale array and return a bool of identical value  BAD
-    resultBool = np.zeros(len(a)) * True
-    for n in range(0, len(a)):
-        resultBool[n] = (a[n] == b[n])
-    resultBool = np.array(resultBool, int)
-    return resultBool
+    return listscale[nmax]
 
-
-def compare_vector(a, b):  # compare 2 scale array and return a bool of identical value  BAD
+def compare_vector(a, ref):  # compare 2 scale array and return a bool of identical value  BAD
     resultBool = np.zeros(len(a)) * True
     score = 0
     for n in range(0, len(a)):
-        for m in range(0, len(b)):
-            if (a[n] == b[m]):
-                score = score + 1
+        for m in range(0, len(ref)):
+            if (a[n] == ref[m]):
+                ponderationScaleIn = 10 / (n+1)
+                if(m==(0 or 4 or 7)):   #fondamentale, tierce et quinte
+                    ponderationRef=3
+                else:
+                    ponderationRef=0
+                score = score +  ponderationScaleIn+ponderationRef
     return score
 
 
@@ -73,7 +90,7 @@ def circularyscale(scale):  # transform scale a redondant value for the >11 (13 
     for n in range(0, len(scale)):
         if (scale[n] > 11):
             scale[n] = scale[n] - 12
-    scale = np.sort(scale)
+    scale = np.sort(scale)  #bad idea to sort everything ?
     return scale
 
 
@@ -88,17 +105,6 @@ def FindScale(our):  # return a vector of better correspondance with known scale
 
     return sumscale
 
-
-def FindScale2(our):  # return a vector of better correspondance with known scale
-    scores = np.zeros(12)
-    our = circularyscale(our)
-    for n in range(0, 12):
-        refscale = np.add([0, 2, 4, 5, 7, 9, 11], [n, n, n, n, n, n, n])
-        refscale = circularyscale(refscale)
-        scores[n] = compare_vector(circularyscale(our), refscale)
-    listscale = ["C", "Cd", "D", "Dd", "E", "F", "Fd", "G", "Gd", "A", "Ad", "B"]
-    max_scores_indexes = np.argsort(scores)
-    return listscale[max_scores_indexes[0]]
 
 
 def FindScaleFromvector(ScaleScoreVector):  # return a vector of better correspondance with known scale
@@ -118,11 +124,11 @@ def GetindexOfMaxNote(ChordsPowersScores, Numberofvalues):
 def GetScale(filename):
     rate, audio_data = scipy.io.wavfile.read(filename, mmap=False)
     spectre, freq = get_fft(audio_data, rate)
-    # spectre,freq = FFTtrunc(spectre,freq,80,800)
+    # spectre,freq = fft_trunc(spectre,freq,80,800)
     for i in range(0, 1):
         spectre, freq = GaussianFilterFFT(spectre, freq, [1, 1, 1, 1, 1])
 
-    ChordsPowersScores = ChordsScores(spectre, freq, 5)
+    ChordsPowersScores =score_for_everynote(spectre, freq, 5)
     listscale = ["C", "Cd", "D", "Dd", "E", "F", "Fd", "G", "Gd", "A", "Ad", "B"]
     print('ChordsPowersScores', ChordsPowersScores)
     Sortedindexs = GetindexOfMaxNote(ChordsPowersScores, 7)
@@ -134,22 +140,6 @@ def GetScale(filename):
 
     return result
 
-
-def GetScale_2(filename):
-    rate, audio_data = scipy.io.wavfile.read(filename, mmap=False)
-    spectre, freq = get_fft(audio_data, rate)
-    # spectre,freq = FFTtrunc(spectre,freq,80,800)
-    for i in range(0, 2):
-        spectre, freq = GaussianFilterFFT(spectre, freq, [1, 1, 1, 1, 1])
-
-    ChordsPowersScores = ChordsScores(spectre, freq, 5)
-    listscale = ["C", "Cd", "D", "Dd", "E", "F", "Fd", "G", "Gd", "A", "Ad", "B"]
-    print('ChordsPowersScores', ChordsPowersScores)
-    Sortedindexs = GetindexOfMaxNote(ChordsPowersScores, 7)
-
-    print('ChordsPowersScores indexes', Sortedindexs)
-    result = FindScale2(Sortedindexs)
-    return result
 
 
 def NumberToLetter(scale):

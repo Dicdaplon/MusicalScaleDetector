@@ -52,7 +52,7 @@ def get_summed_stft(audio_data, windows_time, rate):
     return sum_stft, freqaxes
 
 
-def FFTtrunc(power, axes, StartFreq, EndFreq):
+def fft_trunc(power, axes, StartFreq, EndFreq):
     indexStart = int(np.round(StartFreq / (axes[1])))
     indexEnd = int(np.round(EndFreq / (axes[1])))
     print(indexStart)
@@ -87,3 +87,11 @@ def GaussianFilterFFT(power, axes, ponderation):
     axes = axes[truncHalfW: (len(power) - truncHalfW + 1)]
 
     return FilteredPow, axes
+
+def ShowFFT(Spectre, Freq):
+    fig = plt.gcf()
+    fig.set_size_inches(18.5, 10.5)
+    fig.savefig('test2png.png', dpi=100)
+    plt.xscale("log")
+    plt.plot(Freq, Spectre)
+    plt.show()
