@@ -36,16 +36,6 @@ def TEST_compare_vector():
     assert score1>score2, "perfect scale identification return a worst score than an Partially good"
     assert score2 >score3, "Partially good scale identification return a worst score than an bad one"
 
-def TEST_BoolReturn():
-    result = BoolReturn([1, 2, 4, 0, 1], [1, 2, 4, 0, 1])
-    groundtruth = [1, 1, 1, 1, 1]
-    for i in range(0, len(result)):
-        assert result[i] == groundtruth[i], "Boolreturn detect 2 identic array as different"
-
-    result = BoolReturn([0, 2, 6, 0, 1], [1, 2, 4, 0, 1])
-    groundtruth = [0, 1, 0, 1, 1]
-    for i in range(0, len(result)):
-        assert result[i] == groundtruth[i], "Boolreturn"
 
 
 def TEST_circularyscale():

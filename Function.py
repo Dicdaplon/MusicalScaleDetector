@@ -9,12 +9,13 @@ from scipy.io import wavfile
 import scipy.io
 
 from FFTfunction import *
+from Class import *
 
 
 
 def note_frequencies_construct():
     gamme = np.zeros(12)
-    gamme[0] = 32.7  # C (Do) at 32.7 Hz
+    gamme[0] = 32.7*2  # C (Do) at 32.7 Hz
 
     for i in range(1, len(gamme)): #construct every note in a chromatic scale
         gamme[i] = 1.05946 * gamme[i - 1]
@@ -59,39 +60,52 @@ def compare_with_known_scale (Scalein):
     scoremax=0
     nmax=0
     for n in range(0,len(listscale)):
-        print("compare with", listscale[n])
         refscale=np.add([0,2,4,5,7,9,11],[n,n,n,n,n,n,n])
-        refscale=circularyscale(refscale)
-        newscore=compare_vector(Scalein,refscale)
-        print("refscale", refscale, "ourscale", Scalein)
-        print(" newscore",  newscore)
+        fundamentals=[refscale[0],refscale[2],refscale[4]]
+        refscale,fundamentals=circularyscale(refscale,fundamentals)
+        newscore=compare_vector(Scalein,refscale,fundamentals)
         if (newscore > scoremax):
             scoremax=newscore
             nmax=n
 
     return listscale[nmax]
 
-def compare_vector(a, ref):  # compare 2 scale array and return a bool of identical value  BAD
-    resultBool = np.zeros(len(a)) * True
+def compare_vector(our, ref, fundamentals):  # compare 2 scale array and return a bool of identical value  BAD
     score = 0
-    for n in range(0, len(a)):
+    fundaments_found = [0, 0, 0]
+    for n in range(0, len(our)):
         for m in range(0, len(ref)):
-            if (a[n] == ref[m]):
-                ponderationScaleIn = 10 / (n+1)
-                if(m==(0 or 4 or 7)):   #fondamentale, tierce et quinte
-                    ponderationRef=3
-                else:
-                    ponderationRef=0
-                score = score +  ponderationScaleIn+ponderationRef
+            ponderationRef = 1
+            if (our[n] == ref[m]):
+                if (ref[m] == fundamentals[0]):
+                    print("Fundamentals found !")
+                    fundaments_found[0]=1
+                    ponderationRef = 10
+                if (ref[m] == fundamentals[1]):
+                    print("Tierce found !")
+                    ponderationRef = 10
+                    fundaments_found[1] = 1
+                if (ref[m] == fundamentals[2]):
+                    print("Quinte found !")
+                    ponderationRef = 10
+                    fundaments_found[2] = 1
+                if (np.sum(fundaments_found) == 3):
+                    print("found the big three !")
+                    ponderationRef = 100
+                ponderationScaleIn = 10 / ((n+1)*(n+1))  #score added decrease with order (power) off note
+                score = score + (10*ponderationScaleIn*ponderationRef)
     return score
 
 
-def circularyscale(scale):  # transform scale a redondant value for the >11 (13 = 1, 12 = 0 )
+def circularyscale(scale,fundamentals):  # transform scale a redondant value for the >11 (13 = 1, 12 = 0 )
     for n in range(0, len(scale)):
         if (scale[n] > 11):
             scale[n] = scale[n] - 12
+    for n in range(0, len(fundamentals)):
+        if (fundamentals[n] > 11):
+            fundamentals[n] = fundamentals[n] - 12
     scale = np.sort(scale)  #bad idea to sort everything ?
-    return scale
+    return scale,fundamentals
 
 
 def FindScale(our):  # return a vector of better correspondance with known scale
@@ -130,9 +144,7 @@ def GetScale(filename):
 
     ChordsPowersScores =score_for_everynote(spectre, freq, 5)
     listscale = ["C", "Cd", "D", "Dd", "E", "F", "Fd", "G", "Gd", "A", "Ad", "B"]
-    print('ChordsPowersScores', ChordsPowersScores)
     Sortedindexs = GetindexOfMaxNote(ChordsPowersScores, 7)
-    print('ChordsPowersScores indexes', Sortedindexs)
 
     # Sortedindexs=np.sort(Sortedindexs)
     result = FindScale(Sortedindexs)
@@ -148,5 +160,63 @@ def NumberToLetter(scale):
     for n in range(0, len(scale)):
         letterscale[n] = listscale[scale[n]]
     return letterscale
+
+
+def every_step_show(filename): #usefull for full test of the method
+    oursong= Audio(filename)
+    sample= oursong.sample
+    rate = oursong.rate
+    Spectre, Freq = get_fft(sample,rate)
+
+    #for i in range(0,1):
+        #Spectre, Freq=GaussianFilterFFT(Spectre,Freq, [1,1,2,2,3,3,4,4,6,4,4,3,3,2,2,1,1])
+
+    Spectre = scipy.ndimage.gaussian_filter1d(Spectre, 15, order=0)
+
+
+    scores = score_for_everynote(Spectre, Freq,rate, 10)
+    listscale = ["C", "Cd", "D", "Dd", "E", "F", "Fd", "G", "Gd", "A", "Ad", "B"]
+    print("Score for every note :")
+    for n in range(0, len(listscale)):
+        print(listscale[n]," ", scores[n],"     ")
+
+    print("\nThe most powerfull are (in order) :")
+    scale = GetindexOfMaxNote(scores, 7)
+    for n in range(0, len(scale)):
+        print(listscale[scale[n]])
+
+    print("\ncomparing with all known Scale")
+    for n in range(0, len(listscale)):
+        refscale=np.add([0,2,4,5,7,9,11],[n, n, n, n, n, n, n])
+        fundamentals = [refscale[0], refscale[2], refscale[4]]
+        refscale,fundamentals=circularyscale(refscale,fundamentals)
+        scalescore = compare_vector(scale, refscale,fundamentals)
+        print("Score for ",listscale[n], " = ", scalescore)
+
+    Show_fft(Spectre,Freq,'C')
+    print("scalescore", scalescore)
+    scaleChar = compare_with_known_scale(scale)
+    print("scaleChar", scaleChar)
+
+def Show_fft(Spectre,Freq,notescale): #need to implemant marker with the good note on the graph
+    listscale = ["C", "Cd", "D", "Dd", "E", "F", "Fd", "G", "Gd", "A", "Ad", "B"]
+    scale=0
+    for i in range (0,len(listscale)):
+        if(listscale[i]==notescale):
+            scale=i
+    gamme = note_frequencies_construct()
+    gamme = gamme * np.power(1.05946,i)
+    gamme= np.concatenate([gamme/2,gamme,gamme*2,gamme*4])
+    plt.grid()
+    plt.plot(gamme, np.zeros(len(gamme)), marker="o", markersize=10, markeredgecolor="red", markerfacecolor="green")
+    for n in range(0,len(gamme)):
+        plt.text(gamme[n], 0, str(np.round(gamme[n])), color="red", fontsize=12)
+
+    fig = plt.gcf()
+    fig.set_size_inches(18.5, 10.5)
+    fig.savefig('test2png.png', dpi=100)
+    plt.xscale("log")
+    plt.plot(Freq, Spectre)
+    plt.show()
 
 

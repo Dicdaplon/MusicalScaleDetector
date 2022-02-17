@@ -7,6 +7,8 @@ from matplotlib.pyplot import figure
 import numpy as np
 from scipy.io import wavfile
 import scipy.io
+from Class import *
+from Function import *
 
 
 def get_fft(audio_data, rate):  # return absolute FFT value and freqaxes
@@ -52,7 +54,9 @@ def get_summed_stft(audio_data, windows_time, rate):
     return sum_stft, freqaxes
 
 
-def fft_trunc(power, axes, StartFreq, EndFreq):
+########## Deprecated or not working function
+
+def fft_trunc(power, axes, StartFreq, EndFreq):  # need a rewrite of the other part to work properly
     indexStart = int(np.round(StartFreq / (axes[1])))
     indexEnd = int(np.round(EndFreq / (axes[1])))
     print(indexStart)
@@ -62,7 +66,7 @@ def fft_trunc(power, axes, StartFreq, EndFreq):
     return power, axes
 
 
-def normalizeFFT(spectre, axes):
+def normalizeFFT(spectre, axes):  # not working great for now
     lowfreqmean = np.mean(spectre[0:int(len(spectre) / 3)])
     highfreqmean = np.mean(spectre[int(len(spectre) * 2 / 3):len(spectre)])
     pente = (highfreqmean - lowfreqmean) / (len(spectre) - 0)
@@ -70,7 +74,7 @@ def normalizeFFT(spectre, axes):
         spectre[n] = spectre[n] - (pente * n)
     return spectre, axes
 
-def GaussianFilterFFT(power, axes, ponderation):
+def GaussianFilterFFT(power, axes, ponderation):# depreciated, better use the scipy filter
     WindowsSize = len(ponderation)
 
     truncHalfW = int(WindowsSize / 2)
@@ -88,10 +92,5 @@ def GaussianFilterFFT(power, axes, ponderation):
 
     return FilteredPow, axes
 
-def ShowFFT(Spectre, Freq):
-    fig = plt.gcf()
-    fig.set_size_inches(18.5, 10.5)
-    fig.savefig('test2png.png', dpi=100)
-    plt.xscale("log")
-    plt.plot(Freq, Spectre)
-    plt.show()
+
+
