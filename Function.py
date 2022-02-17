@@ -88,19 +88,15 @@ def compare_vector(our, ref, fundamentals):  # compare 2 scale array and return 
             ponderationRef = 1
             if (our[n] == ref[m]):
                 if (ref[m] == fundamentals[0]):
-                    print("Fundamentals found !")
                     fundaments_found[0]=1
                     ponderationRef = 10
                 if (ref[m] == fundamentals[1]):
-                    print("Tierce found !")
                     ponderationRef = 10
                     fundaments_found[1] = 1
                 if (ref[m] == fundamentals[2]):
-                    print("Quinte found !")
                     ponderationRef = 10
                     fundaments_found[2] = 1
                 if (np.sum(fundaments_found) == 3):
-                    print("found the big three !")
                     ponderationRef = 100
                 ponderationScaleIn = 10 / ((n+1)*(n+1))  #score added decrease with order (power) off note
                 score = score + (10*ponderationScaleIn*ponderationRef)
@@ -172,7 +168,7 @@ def NumberToLetter(scale):
     return letterscale
 
 
-def every_step_show(filename): #usefull for full test of the method
+def every_step_show(filename, realscale): #usefull for full test of the method
     oursong= Audio(filename)
     sample= oursong.sample
     rate = oursong.rate
@@ -186,27 +182,28 @@ def every_step_show(filename): #usefull for full test of the method
 
     scores = score_for_everynote(Spectre, Freq,rate, 10)
     listscale = ["C", "Cd", "D", "Dd", "E", "F", "Fd", "G", "Gd", "A", "Ad", "B"]
-    print("Score for every note :")
+
     for n in range(0, len(listscale)):
         print(listscale[n]," ", scores[n],"     ")
 
-    print("\nThe most powerfull are (in order) :")
+
     scale = GetindexOfMaxNote(scores, 7)
     for n in range(0, len(scale)):
         print(listscale[scale[n]])
 
-    print("\ncomparing with all known Scale")
+
     for n in range(0, len(listscale)):
         refscale=np.add([0,2,4,5,7,9,11],[n, n, n, n, n, n, n])
         fundamentals = [refscale[0], refscale[2], refscale[4]]
         refscale,fundamentals=circularyscale(refscale,fundamentals)
         scalescore = compare_vector(scale, refscale,fundamentals)
-        print("Score for ",listscale[n], " = ", scalescore)
 
-    Show_fft(Spectre,Freq,"C")
-    print("scalescore", scalescore)
+
+    Show_fft(Spectre,Freq,realscale)
+
     scaleChar = compare_with_known_scale(scale)
-    print("scaleChar", scaleChar)
+    print("\n\n  The good scale is", scaleChar)
+
 
 
 def Show_fft(Spectre,Freq,notescale): #need to implemant marker with the good note on the graph
@@ -216,14 +213,13 @@ def Show_fft(Spectre,Freq,notescale): #need to implemant marker with the good no
         if(listscale[i]==notescale):
             scale=i
     gamme = note_frequencies_construct()
-
-    print("gamme[0]",gamme[0])
     Biglistscale=listscale
+
     for n in range (0,scale):
         gamme=np.multiply(gamme,1.05946)#adapt scale frequency to selected scale
         listscale=np.concatenate([listscale,listscale])
-        listscale=listscale[scale:12+scale]
-    print("gamme[0]",gamme[0])
+    listscale=listscale[scale:12+scale]
+
 
     goodnote=[0,2,4,5,7,9,11]
     badnote=[1,3,6,8,10]
@@ -232,6 +228,7 @@ def Show_fft(Spectre,Freq,notescale): #need to implemant marker with the good no
     Biggamme=gamme
     Biggoodnote=goodnote
     Bigbadnote=badnote
+
     for numberofscale in range(0,3):
         gamme=gamme*2
         Biggamme = np.concatenate([Biggamme, gamme])
@@ -241,14 +238,9 @@ def Show_fft(Spectre,Freq,notescale): #need to implemant marker with the good no
         badnote = np.add(badnote, 12)
         Bigbadnote = np.concatenate([Bigbadnote,badnote])
 
-    print("Biggamme len", len(Biggamme))
-    print("Biggamme ", Biggamme)
-    print("Biglist lent", len(Biglistscale))
-    print("Biglist ", Biglistscale)
     plt.grid()
     maxfft=np.max(Spectre)
     plt.xlim(60,1000)
-    print("Biggoodnote", Biggoodnote)
     for n in  Biggoodnote:
         plt.vlines(Biggamme[n], 0, maxfft, linestyles="dotted", colors="green")
         plt.text(Biggamme[n], 0, Biglistscale[n], color="green", fontsize=12)
@@ -256,14 +248,6 @@ def Show_fft(Spectre,Freq,notescale): #need to implemant marker with the good no
         plt.vlines(Biggamme[n], 0, maxfft, linestyles="dotted", colors="red")
         plt.text(Biggamme[n], 0, Biglistscale[n], color="red", fontsize=12)
 
-
-    #for n in range(0,len(Biggamme)):
-        #plt.vlines(Biggamme[n], 0, maxfft, linestyles="dotted", colors="k")
-        #plt.text(Biggamme[n], 0, Biglistscale[n], color="red", fontsize=12)
-    #for n in range(0,len(gamme)):
-        #plt.vlines(gamme[n], 0, maxfft, linestyles="dotted", colors="k")
-        #plt.text(gamme[n], 0,Biglistscale[n], color="red", fontsize=12)
-        #plt.text(gamme[n], 0, str(np.round(gamme[n])), color="red", fontsize=12)
 
     fig = plt.gcf()
     fig.set_size_inches(18.5, 10.5)

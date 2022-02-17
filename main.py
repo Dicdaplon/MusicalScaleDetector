@@ -20,6 +20,6 @@ test=[1.0,1,1,5,1,1,1,9,1,1,2,3,5,4]
 test=scipy.ndimage.gaussian_filter1d(test, 1)
 
 print(test)
-every_step_show("Cclean.wav")
+every_step_show("D.wav","Fd")
 
 
