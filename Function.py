@@ -193,7 +193,7 @@ def every_step_show(filename): #usefull for full test of the method
         scalescore = compare_vector(scale, refscale,fundamentals)
         print("Score for ",listscale[n], " = ", scalescore)
 
-    Show_fft(Spectre,Freq,'C')
+    Show_fft(Spectre,Freq,"C")
     print("scalescore", scalescore)
     scaleChar = compare_with_known_scale(scale)
     print("scaleChar", scaleChar)
@@ -205,12 +205,54 @@ def Show_fft(Spectre,Freq,notescale): #need to implemant marker with the good no
         if(listscale[i]==notescale):
             scale=i
     gamme = note_frequencies_construct()
-    gamme = gamme * np.power(1.05946,i)
-    gamme= np.concatenate([gamme/2,gamme,gamme*2,gamme*4])
+
+    print("gamme[0]",gamme[0])
+    Biglistscale=listscale
+    for n in range (0,scale):
+        gamme=np.multiply(gamme,1.05946)#adapt scale frequency to selected scale
+        listscale=np.concatenate([listscale,listscale])
+        listscale=listscale[scale:12+scale]
+    print("gamme[0]",gamme[0])
+
+    goodnote=[0,2,4,5,7,9,11]
+    badnote=[1,3,6,8,10]
+
+    Biglistscale=listscale
+    Biggamme=gamme
+    Biggoodnote=goodnote
+    Bigbadnote=badnote
+    for numberofscale in range(0,3):
+        gamme=gamme*2
+        Biggamme = np.concatenate([Biggamme, gamme])
+        Biglistscale=np.concatenate([Biglistscale,listscale])
+        goodnote=np.add(goodnote,12)
+        Biggoodnote = np.concatenate([Biggoodnote,goodnote])
+        badnote = np.add(badnote, 12)
+        Bigbadnote = np.concatenate([Bigbadnote,badnote])
+
+    print("Biggamme len", len(Biggamme))
+    print("Biggamme ", Biggamme)
+    print("Biglist lent", len(Biglistscale))
+    print("Biglist ", Biglistscale)
     plt.grid()
-    plt.plot(gamme, np.zeros(len(gamme)), marker="o", markersize=10, markeredgecolor="red", markerfacecolor="green")
-    for n in range(0,len(gamme)):
-        plt.text(gamme[n], 0, str(np.round(gamme[n])), color="red", fontsize=12)
+    maxfft=np.max(Spectre)
+    plt.xlim(60,1000)
+    print("Biggoodnote", Biggoodnote)
+    for n in  Biggoodnote:
+        plt.vlines(Biggamme[n], 0, maxfft, linestyles="dotted", colors="green")
+        plt.text(Biggamme[n], 0, Biglistscale[n], color="green", fontsize=12)
+    for n in  Bigbadnote:
+        plt.vlines(Biggamme[n], 0, maxfft, linestyles="dotted", colors="red")
+        plt.text(Biggamme[n], 0, Biglistscale[n], color="red", fontsize=12)
+
+
+    #for n in range(0,len(Biggamme)):
+        #plt.vlines(Biggamme[n], 0, maxfft, linestyles="dotted", colors="k")
+        #plt.text(Biggamme[n], 0, Biglistscale[n], color="red", fontsize=12)
+    #for n in range(0,len(gamme)):
+        #plt.vlines(gamme[n], 0, maxfft, linestyles="dotted", colors="k")
+        #plt.text(gamme[n], 0,Biglistscale[n], color="red", fontsize=12)
+        #plt.text(gamme[n], 0, str(np.round(gamme[n])), color="red", fontsize=12)
 
     fig = plt.gcf()
     fig.set_size_inches(18.5, 10.5)
