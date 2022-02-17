@@ -29,18 +29,28 @@ def frequence_to_index(frequence, octave, freqaxe,rate):
     freq_ind=int(np.round(freq_ind))
     return freq_ind
 
+def windows_hz_to_n(hz,freqaxe): #transform a windows in hz to a number of sample n
+    hz=float(hz)
+    df=freqaxe[1]-freqaxe[0]
+    n=hz/df
+    n=int(np.round(n))
+    return n
+
 
 def note_score(spectre, freq,rate, note, windows):  # return summed score for a note C,Cd,D...
     listscale = ["C", "Cd", "D", "Dd", "E", "F", "Fd", "G", "Gd", "A", "Ad", "B"]
     gamme = note_frequencies_construct()  # all the normalize value, C to B (Do vers Si) in Hz
-
     noteindex = listscale.index(note)  # reach for the indexes of the searched note (ex Cd -> 1)
     powerscale = 0
-    n = noteindex;
+    n = noteindex
     np.max(spectre)
     spectre = spectre / np.max(spectre)
     for i in range(0, 6):
-        freq_ind = frequence_to_index(gamme[n], i, freq,rate)
+        freq_hz=gamme[n] * np.power(2, i)
+        windows_hz=0.0544*freq_hz-0.0404  #regression adjustement, the windows increase with frequency
+        windows=windows_hz_to_n(windows_hz, freq)
+        windows= int(np.round(windows/2))
+        freq_ind = frequence_to_index(gamme[n], i, freq,rate)  #need modification to doesn't take octave in parameter
         moyennage = np.mean(spectre[freq_ind - windows:freq_ind + windows + 1]) #maybe be not usefull...
         powerscale = powerscale + moyennage
     return powerscale
@@ -197,6 +207,7 @@ def every_step_show(filename): #usefull for full test of the method
     print("scalescore", scalescore)
     scaleChar = compare_with_known_scale(scale)
     print("scaleChar", scaleChar)
+
 
 def Show_fft(Spectre,Freq,notescale): #need to implemant marker with the good note on the graph
     listscale = ["C", "Cd", "D", "Dd", "E", "F", "Fd", "G", "Gd", "A", "Ad", "B"]
