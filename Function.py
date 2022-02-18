@@ -56,7 +56,14 @@ def get_max_notes(filename): #usefull for full test of the method  FOR BOUBOU
 
     return scale
 
-def note_frequencies_construct(): #construct in Hz every note C to B including the # notes
+def note_frequencies_construct():
+    """
+        Construct the frequencies (Hz) of one scale from C to B
+        Parameter:
+        None
+        return:
+        float array, size =12
+        """
     gamme = np.zeros(12)
     gamme[0] = 32.7*2  # C (Do) at 32.7 Hz
 
@@ -65,7 +72,17 @@ def note_frequencies_construct(): #construct in Hz every note C to B including t
     return gamme
 
 
-def frequence_to_index(frequence, octave, freqaxe,rate):
+def frequence_to_index(frequence, octave, freqaxe,rate): #It make no sense to compute the octave here
+     """
+        Return n index for a seleted freqency
+        Parameter:
+        frequence: value we want to convert (Hz)
+        octave : select the octave (multiply freq by 2 each time)
+        freqaxe : frequence axe
+        freqaxe : sample rate of the audio (Hz)
+        return:
+        (int) n index
+        """
     freq_ind = frequence * np.power(2, octave)  # look for the selected freq and octave
     freq_ind = freq_ind + freqaxe[0]  # add a starting frequency as constant, fix for trunc function
     freq_ind = freq_ind * len(freqaxe) / rate  #transform frequence into indexes
@@ -73,12 +90,30 @@ def frequence_to_index(frequence, octave, freqaxe,rate):
     return freq_ind
 
 def windows_hz_to_n(hz,freqaxe): #transform a windows in hz to a number of sample n
+    """
+    Transform a windows size in Hz, to a number n of indexes
+    Parameter:
+    hz: value we want to convert (Hz)
+    freqaxe : frequencies axes
+    return:
+    (int) n number, size of the windows in sample
+    """
     hz=float(hz)
     df=freqaxe[1]-freqaxe[0]
     n=hz/df
     n=int(np.round(n))
     return n
 
+def windows_hz_size_adjustement(freq_hz):
+    """
+        adjust the size of the windows (Hz) depending of the frequence with linear regression
+        Parameter:
+        frequence : selected frequency (Hz)
+        return:
+        adjusted frequency (Hz)
+        """
+    windows_hz = 0.0544 * freq_hz - 0.0404
+    return windows_hz
 
 def note_score(spectre, freq, rate, note, windows):  # return summed score for a note C,Cd,D...
     listscale = ["C", "Cd", "D", "Dd", "E", "F", "Fd", "G", "Gd", "A", "Ad", "B"]
@@ -90,9 +125,10 @@ def note_score(spectre, freq, rate, note, windows):  # return summed score for a
     spectre = spectre / np.max(spectre)
     for i in range(0, 6):
         freq_hz=gamme[n] * np.power(2, i)
-        windows_hz=0.0544*freq_hz-0.0404  #regression adjustement, the windows increase with frequency
+        windows_hz=windows_hz_size_adjustement(freq_hz) #regression adjustement, the windows increase with frequency
         windows=windows_hz_to_n(windows_hz, freq)
         windows= int(np.round(windows/2))
+
         freq_ind = frequence_to_index(gamme[n], i, freq,rate)  #need modification to doesn't take octave in parameter
         moyennage = np.mean(spectre[freq_ind - windows:freq_ind + windows + 1]) #maybe be not usefull...
         powerscale = powerscale + moyennage
@@ -100,11 +136,20 @@ def note_score(spectre, freq, rate, note, windows):  # return summed score for a
 
 
 def score_for_everynote(spectre, freq,rate, windows):  # return vector of summed scores for each note C,Cd,D...
+    """
+    Compute the scores of every note existing
+    Parameter:
+    spectre : Spectrum get from fft
+    freq : frequence axe (Hz)
+    rate : audio sample rate (Hz)
+    windows : length of values we consider around our selected frequence
+    return: array of float with score for every notes (C to B), size 12
+    """
     powersvector = np.zeros(12);
     listscale = ["C", "Cd", "D", "Dd", "E", "F", "Fd", "G", "Gd", "A", "Ad", "B"]
     n = 0
     for note in listscale:
-        powersvector[n] = note_score(spectre, freq, rate, note, 30)
+        powersvector[n] = note_score(spectre, freq, rate, note, 30)  #!! the windows is hard coded, why ?
         n = n + 1
     return powersvector
 

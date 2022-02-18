@@ -11,7 +11,17 @@ from Class import *
 from Function import *
 
 
-def get_fft(audio_data, rate):  # return absolute FFT value and freqaxes
+def get_fft(audio_data, rate):
+    """
+    Compute the fft
+    Parameter:
+    audio_data: audio sample array
+    rate: int, sample rate in hz
+    return:
+    Absolute Spectre
+    frequencies axes
+    """
+
     T = (len(audio_data) - 1) * (1 / rate)
     fe = rate
     t = np.arange(start=0.0, stop=T, step=1.0 / fe)
@@ -23,7 +33,18 @@ def get_fft(audio_data, rate):  # return absolute FFT value and freqaxes
     return spectre, freq
 
 
-def get_stft(audio_data, windows_time, where_time, rate):  # return absolute FFT value and freqaxes
+def get_stft(audio_data, windows_time, where_time, rate):
+    """
+        Compute an stft (short_time windowed fft)
+        Parameter:
+        audio_data: audio sample array
+        rate: int, sample rate in hz
+        windows_time: size of windows in s
+        where_time: where in audio data ? in s
+        return:
+        Absolute Spectre
+        frequencies axes
+    """
     windowsn = windows_time * rate
     wheren = np.round(where_time * rate)
     halfwindows = int(windowsn / 2)
@@ -44,6 +65,16 @@ def get_stft(audio_data, windows_time, where_time, rate):  # return absolute FFT
 
 
 def get_summed_stft(audio_data, windows_time, rate):
+    """
+    Compute the summed stft all along the audio
+    Parameter:
+    audio_data: audio sample array
+    rate: int, sample rate in hz
+    windows_time: size of windows in s
+    return:
+    Absolute Spectre
+    frequencies axes
+    """
     sum_stft = 0
     windowsn = windows_time * rate
     halfwindows = int(windowsn / 2)
@@ -56,14 +87,25 @@ def get_summed_stft(audio_data, windows_time, rate):
 
 ########## Deprecated or not working function
 
-def fft_trunc(power, axes, StartFreq, EndFreq):  # need a rewrite of the other part to work properly
-    indexStart = int(np.round(StartFreq / (axes[1])))
-    indexEnd = int(np.round(EndFreq / (axes[1])))
+def fft_trunc(spectrum, freq_axes, StartFreq, EndFreq):  # need a rewrite of the other part to work properly
+    """
+    trunc the spectrum and frequence axes to choosen value
+    Parameter:
+    spectrum: Spectral content
+    freq_axes: frequencies axes
+    StartFreq: start frequency in hz
+    EndFreq: end frequency in hz
+    return:
+    Absolute Spectre
+    frequencies axes
+    """
+    indexStart = int(np.round(StartFreq / (freq_axes[1])))
+    indexEnd = int(np.round(EndFreq / (freq_axes[1])))
     print(indexStart)
     print(indexEnd)
-    axes = axes[indexStart:indexEnd]
-    power = power[indexStart:indexEnd]
-    return power, axes
+    freq_axes = freq_axes[indexStart:indexEnd]
+    spectrum = spectrum[indexStart:indexEnd]
+    return spectrum, freq_axes
 
 
 def normalizeFFT(spectre, axes):  # not working great for now
@@ -74,23 +116,6 @@ def normalizeFFT(spectre, axes):  # not working great for now
         spectre[n] = spectre[n] - (pente * n)
     return spectre, axes
 
-def GaussianFilterFFT(power, axes, ponderation):# depreciated, better use the scipy filter
-    WindowsSize = len(ponderation)
-
-    truncHalfW = int(WindowsSize / 2)
-
-    FilteredPow = np.zeros(len(power))
-
-    for n in range(truncHalfW, len(power) - truncHalfW):  # from 0 to Pow length - windows
-        windows = power[(n - truncHalfW):(n + truncHalfW + 1)]
-        windows = np.multiply(windows, ponderation)
-        FilteredPow[n] = np.mean(windows)
-
-    FilteredPow = FilteredPow[truncHalfW: (len(power) - truncHalfW + 1)]
-
-    axes = axes[truncHalfW: (len(power) - truncHalfW + 1)]
-
-    return FilteredPow, axes
 
 
 
