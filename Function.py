@@ -12,8 +12,38 @@ from FFTfunction import *
 from Class import *
 
 
+def get_max_notes(filename): #usefull for full test of the method  FOR BOUBOU
 
-def note_frequencies_construct():
+    listscale = ["C", "Cd", "D", "Dd", "E", "F", "Fd", "G", "Gd", "A", "Ad", "B"]
+    print("every note is associated to a number as :")
+    print(listscale)
+    print([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11])
+    print("For Example the Cmajor scale :")
+    print([0,2,4,5,7,9,11])
+
+    oursong= Audio(filename)
+    sample= oursong.sample
+    rate = oursong.rate
+    Spectre, Freq = get_fft(sample,rate)
+
+    Spectre = scipy.ndimage.gaussian_filter1d(Spectre, 15, order=0)  #smoothing the FFT
+
+    print("\n Power for every note : ")
+    scores = score_for_everynote(Spectre, Freq,rate, 10) #return a vector of energy detected for every notes (float)
+    for n in range(0, len(listscale)):
+        print(listscale[n]," ", scores[n],"     ")
+
+
+    scale = GetindexOfMaxNote(scores, 7)
+
+    print("\n note detected ", scale)
+    for n in range(0, len(scale)):
+        print(listscale[scale[n]])
+
+
+    return scale
+
+def note_frequencies_construct(): #construct in Hz every note C to B including the # notes
     gamme = np.zeros(12)
     gamme[0] = 32.7*2  # C (Do) at 32.7 Hz
 

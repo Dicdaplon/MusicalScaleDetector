@@ -15,11 +15,11 @@ from TEST import *
 from Class import *
 
 
-test=[1.0,1,1,5,1,1,1,9,1,1,2,3,5,4]
+scale=get_max_notes("C.wav")
+print("\n scale", scale)
 
-test=scipy.ndimage.gaussian_filter1d(test, 1)
 
-print(test)
-every_step_show("D.wav","Fd")
+
+#every_step_show("C.wav","C")
 
 
