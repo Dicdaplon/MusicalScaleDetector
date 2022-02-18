@@ -8,11 +8,18 @@ import numpy as np
 from scipy.io import wavfile
 import scipy.io
 
-from FFTfunction import *
+from FFTfunction import get_fft
 from Class import *
 
 
 def get_max_notes(filename): #usefull for full test of the method  FOR BOUBOU
+    """ 
+    get_max_notes computes a wav file and extract the notes
+    Parameter:
+    filename: wav file
+
+    return: list of detected notes 
+    """
 
     listscale = ["C", "Cd", "D", "Dd", "E", "F", "Fd", "G", "Gd", "A", "Ad", "B"]
     print("every note is associated to a number as :")
@@ -28,13 +35,19 @@ def get_max_notes(filename): #usefull for full test of the method  FOR BOUBOU
 
     Spectre = scipy.ndimage.gaussian_filter1d(Spectre, 15, order=0)  #smoothing the FFT
 
+    print('Size of Freq' ,str(len(Freq)))
+    print('This is Freq', Freq)
+
+    print('Size of spectre', str(len(Spectre)))
+    print('This is spectre', Spectre)
+
     print("\n Power for every note : ")
-    scores = score_for_everynote(Spectre, Freq,rate, 10) #return a vector of energy detected for every notes (float)
+    scores = score_for_everynote(Spectre, Freq, rate, 10) #return a vector of energy detected for every notes (float)
     for n in range(0, len(listscale)):
         print(listscale[n]," ", scores[n],"     ")
 
 
-    scale = GetindexOfMaxNote(scores, 7)
+    scale = GetindexOfMaxNote(scores, 5)
 
     print("\n note detected ", scale)
     for n in range(0, len(scale)):
@@ -67,7 +80,7 @@ def windows_hz_to_n(hz,freqaxe): #transform a windows in hz to a number of sampl
     return n
 
 
-def note_score(spectre, freq,rate, note, windows):  # return summed score for a note C,Cd,D...
+def note_score(spectre, freq, rate, note, windows):  # return summed score for a note C,Cd,D...
     listscale = ["C", "Cd", "D", "Dd", "E", "F", "Fd", "G", "Gd", "A", "Ad", "B"]
     gamme = note_frequencies_construct()  # all the normalize value, C to B (Do vers Si) in Hz
     noteindex = listscale.index(note)  # reach for the indexes of the searched note (ex Cd -> 1)
@@ -91,7 +104,7 @@ def score_for_everynote(spectre, freq,rate, windows):  # return vector of summed
     listscale = ["C", "Cd", "D", "Dd", "E", "F", "Fd", "G", "Gd", "A", "Ad", "B"]
     n = 0
     for note in listscale:
-        powersvector[n] = note_score(spectre, freq,rate, note, 30)
+        powersvector[n] = note_score(spectre, freq, rate, note, 30)
         n = n + 1
     return powersvector
 
