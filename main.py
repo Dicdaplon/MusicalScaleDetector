@@ -12,22 +12,24 @@ import scipy.io
 from Function import *
 from FFTfunction import *
 from TEST import *
-from FunctionsScaleProcessing import get_intervals_list, get_positions_in_scale_list, get_corresponding_scales
+from FunctionsScaleProcessing import Scale
 from Class import *
 
-scale=get_max_notes("CBlues1.wav")
+scale=get_max_notes("Gclean.wav")
 print("\n scale", scale)
 
 #every_step_show("C.wav","C")
 
 
-list_intervals = get_intervals_list(scale)
+new_scale = Scale(scale)
 
-list_positions = get_positions_in_scale_list(list_intervals)
+list_intervals = new_scale.get_list_intervals()
 
-corresponding_scales = get_corresponding_scales(list_positions)
+list_positions = new_scale.get_list_positions_in_scale()
 
-print('List of corresponding scales : ', corresponding_scales)
+list_corresponding_scales = new_scale.get_list_corresponding_scales()
 
+list_english_notation = new_scale.get_list_english_notation()
 
+new_scale.generate_fretboard_svg()
 
