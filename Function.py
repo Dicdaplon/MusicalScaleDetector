@@ -58,7 +58,7 @@ def get_max_notes(filename): #usefull for full test of the method  FOR BOUBOU
 
 def note_frequencies_construct(): #construct in Hz every note C to B including the # notes
     gamme = np.zeros(12)
-    gamme[0] = 32.7*2  # C (Do) at 32.7 Hz
+    gamme[0] = 65.4  # C (Do) at 32.7 Hz
 
     for i in range(1, len(gamme)): #construct every note in a chromatic scale
         gamme[i] = 1.05946 * gamme[i - 1]
@@ -220,7 +220,11 @@ def every_step_show(filename, realscale): #usefull for full test of the method
     #for i in range(0,1):
         #Spectre, Freq=GaussianFilterFFT(Spectre,Freq, [1,1,2,2,3,3,4,4,6,4,4,3,3,2,2,1,1])
 
+<<<<<<< HEAD
     Spectre = scipy.ndimage.gaussian_filter1d(Spectre, 15*2, order=0)
+=======
+    Spectre = scipy.ndimage.gaussian_filter1d(Spectre, 15*3, order=0)
+>>>>>>> 3ac9f8640ed8f4a2db86236e8149b07f30f36ccd
 
 
     scores = score_for_everynote(Spectre, Freq,rate, 10)

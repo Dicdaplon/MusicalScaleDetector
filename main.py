@@ -10,6 +10,7 @@ import scipy.io
 import os
 
 #Internal libraries
+from GenerateData import *
 from Function import *
 from FFTfunction import *
 from TEST import *
@@ -20,9 +21,7 @@ file_input = "D.wav"
 
 scale=get_max_notes(file_input)
 
-print("\n scale", scale)
-
-#every_step_show("C.wav","C")
+every_step_show("C.wav","C")
 
 target_folder = 'outputs/' + os.path.splitext(file_input)[0]
 

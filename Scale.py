@@ -11,7 +11,7 @@ def get_interval(first_note, second_note):
     Computes the interval between to note according to the index
     Parameters:
     first_note: integer (between 0 and 11)
-    second_note: integer (between 0 and 11)
+    second_note: integer (between pip 0 and 11)
 
     Return:
     interval: integer
