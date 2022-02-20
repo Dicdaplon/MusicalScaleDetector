@@ -19,6 +19,9 @@ class Audio :
     def __init__(self, filename):
         self.rate, self.sample = scipy.io.wavfile.read(filename, mmap=False)
 
+
+
+
     #def get_fft(self,sample, rate):
      #   self.fft,self.freq_axe=get_fft(self,sample, rate)
 

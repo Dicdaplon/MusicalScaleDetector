@@ -9,16 +9,18 @@ from scipy.io import wavfile
 import scipy.io
 
 #Internal libraries
+from GenerateData import *
 from Function import *
 from FFTfunction import *
 from TEST import *
 from FunctionsScaleProcessing import Scale
 from Class import *
 
-scale=get_max_notes("Gclean.wav")
+
+scale=get_max_notes("C.wav")
 print("\n scale", scale)
 
-#every_step_show("C.wav","C")
+every_step_show("C.wav","C")
 
 
 new_scale = Scale(scale)
