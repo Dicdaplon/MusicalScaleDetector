@@ -1,7 +1,10 @@
 import numpy as np
 import pandas as pd
+import csv
+import os
 from fretboardgtr import ScaleGtr
-
+from pathlib import Path
+from datetime import datetime
 
 def get_interval(first_note, second_note):
     """
@@ -203,14 +206,48 @@ class Scale:
 
     def generate_fretboard_svg(self):
         """
-        Need the english list notations
+        Save a fretboard.svg file according to the english notation. The file is saved in the output directory
 
         """
 
         root_english_notation = self.dict_notations[self.key_note]['english_notation']
 
+        Path("./" + self.file_name).mkdir( exist_ok=True)
+
         F = ScaleGtr(scale=self.list_notes_english_notation, root=root_english_notation)
         F.customtuning(['E', 'A', 'D', 'G', 'B', 'E'])
         F.theme(show_note_name=True)
+        F.pathname(self.file_name + '/fretboard.svg')
         F.draw()
         F.save()
+
+
+    def save_result_to_csv(self):
+        """
+        Save the main informations from the scale in a csv file in the specified directory folder
+        """
+
+        now = datetime.now()
+        dt_string = now.strftime("%d/%m/%Y %H:%M:%S")
+
+        dict_result = {
+            "date": dt_string,
+            "key_note": self.dict_notations[self.key_note]['english_notation'],
+            "english_notation": self.list_notes_english_notation,
+            "intervals": self.list_intervals,
+            "position_in_scale": self.list_positions_in_scale,
+        }
+
+        directory_path = "./" + self.file_name
+
+        Path(directory_path).mkdir(exist_ok=True)
+
+        csv_file = directory_path + '/result.csv'
+
+        try:
+            with open(csv_file, 'w') as csvfile:
+                writer = csv.writer(csvfile)
+                for key, value in dict_result.items():
+                    writer.writerow([key, value])
+        except IOError:
+            print("I/O error")

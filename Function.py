@@ -220,7 +220,7 @@ def every_step_show(filename, realscale): #usefull for full test of the method
     #for i in range(0,1):
         #Spectre, Freq=GaussianFilterFFT(Spectre,Freq, [1,1,2,2,3,3,4,4,6,4,4,3,3,2,2,1,1])
 
-    Spectre = scipy.ndimage.gaussian_filter1d(Spectre, 15, order=0)
+    Spectre = scipy.ndimage.gaussian_filter1d(Spectre, 15*2, order=0)
 
 
     scores = score_for_everynote(Spectre, Freq,rate, 10)
