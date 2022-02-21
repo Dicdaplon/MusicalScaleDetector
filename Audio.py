@@ -374,7 +374,7 @@ def Print_fft(Spectre,Freq,notescale,peaks, file_path=None): #need to implemant 
     # if a file_path is given
     if file_path is not None:
 
-        Path(file_path).mkdir(exist_ok=True)
+        Path(file_path).mkdir(exist_ok=True, parents=True)
         plt.savefig(file_path + "/spectrogram.png", dpi=100)
         plt.clf()
 
