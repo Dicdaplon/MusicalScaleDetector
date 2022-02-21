@@ -404,7 +404,7 @@ def hz_to_note (frequency):
     frequency :  (float) Input freqency in Hz
     return: (str) nearest note
     """
-    listscale = ["C", "Cd", "D", "Dd", "E", "F", "Fd", "G", "Gd", "A", "Ad", "B"]
+    listscale = listscale_from_dict()
     limit_of_octave1=(123+131)/2
     while(frequency>limit_of_octave1):
         frequency=frequency/2

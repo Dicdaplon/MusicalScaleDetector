@@ -1,10 +1,10 @@
 import numpy as np
 import pandas as pd
 import csv
-import os
 from fretboardgtr import ScaleGtr
 from pathlib import Path
 from datetime import datetime
+
 
 def get_interval(first_note, second_note):
     """
