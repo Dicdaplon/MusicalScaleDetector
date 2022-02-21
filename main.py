@@ -1,4 +1,5 @@
 from Audio import *
+from Scale import *
 
 #choose your sample here
 
@@ -17,7 +18,7 @@ Audio_Obj.fft_show()
 
 
 
-predict_scale(file_input,real_scale)
+#predict_scale(file_input,real_scale)
 
 
 show_perf_test_one_scale("C#",10,"CleanGuitar")
