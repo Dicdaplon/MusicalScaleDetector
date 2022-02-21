@@ -1,29 +1,37 @@
 from Audio import *
 
-#choose your sample here
+
+#Starting Zone
 real_scale="C#"
 sample_number=7
 type_of_sample="CleanGuitar"
 
+
+#Don't touch zone
 file_input = get_sample_filepath(real_scale,sample_number,type_of_sample)
 
 
+
+#Have fun zone (supress and test all you want)
 Audio_Obj = Audio(file_input,real_scale)
 print(Audio_Obj.sample)
 Audio_Obj.fft()
-Audio_Obj.fft_show()
+Audio_Obj.smooth_fft(30)
+Audio_Obj.find_peaks()
+Audio_Obj.find_max_notes_peaks()
 
 
+scale=Audio_Obj.max_notes_char
 
 
 predict_scale(file_input,real_scale)
 
 
-show_perf_test_one_scale("C#",10,"CleanGuitar")
+show_perf_test_one_scale("C",10,"CleanGuitar")
 
 predict_scale_show(file_input,real_scale)
 
-scale=get_max_notes(file_input)
+scale=Audio_Obj.max_notes_char
 
 
 target_folder = 'outputs/' + os.path.splitext(file_input)[0]
