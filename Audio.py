@@ -217,6 +217,12 @@ def GetScale(filename):
 
     return result
 
+def find_in_str_list(ourstr,list_str):
+    index=-1
+    for n in range(0,len(list_str)):
+        if (ourstr == list_str[n]):
+            index=n
+    return index
 
 
 def NumberToLetter(scale):
@@ -225,6 +231,24 @@ def NumberToLetter(scale):
     for n in range(0, len(scale)):
         letterscale[n] = listscale[scale[n]]
     return letterscale
+
+def LetterToNumber(note_str):
+    listscale = listscale_from_dict()
+    number=find_in_str_list(note_str,listscale)
+    return number
+
+
+def LettersToNumbers(scaleChar):
+    listscale=listscale_from_dict()
+    print(scaleChar)
+
+    number_scale=np.zeros(len(scaleChar))
+    for n in range(0,len(scaleChar)):
+        actual_str=scaleChar[n]
+        print(actual_str)
+        number_scale[n]=int(LetterToNumber(actual_str))
+
+    return number_scale
 
 
 def predict_scale_show(filename, realscale): #usefull for full test of the method
@@ -235,22 +259,14 @@ def predict_scale_show(filename, realscale): #usefull for full test of the metho
             realscale:  (str) groundtruth scale
             return: (str) predicted scale
             """
-    oursong= Audio(filename)
-    sample= oursong.sample
-    rate = oursong.rate
-    Spectre, Freq = get_fft(sample,rate)
+    oursong= Audio(filename,realscale)
 
-    #for i in range(0,1):
-        #Spectre, Freq=GaussianFilterFFT(Spectre,Freq, [1,1,2,2,3,3,4,4,6,4,4,3,3,2,2,1,1])
+    oursong.fft()
+    oursong.smooth_fft(45)
 
 
 
-
-    Spectre = scipy.ndimage.gaussian_filter1d(Spectre, 15*3, order=0)
-
-
-
-    scores = score_for_everynote(Spectre, Freq,rate, 10)
+    scores = score_for_everynote(oursong.spectrum, oursong.frequencies,oursong.rate, 10)
     listscale=listscale_from_dict()
 
     for n in range(0, len(listscale)):
@@ -269,12 +285,10 @@ def predict_scale_show(filename, realscale): #usefull for full test of the metho
         scalescore = compare_vector(scale, refscale,fundamentals)
 
 
-    Show_fft(Spectre,Freq,realscale)
-
     scaleChar = compare_with_known_scale(scale)
     print("\n\n  The good scale is", scaleChar)
     return scaleChar
-
+    oursong.fft_show()
 def predict_scale(filename, realscale): #usefull for full test of the method
     """
         Compute the method to the end, no print, no show
@@ -283,7 +297,7 @@ def predict_scale(filename, realscale): #usefull for full test of the method
         realscale:  (str) groundtruth scale
         return: (str) predicted scale
         """
-    oursong= Audio(filename)
+    oursong= Audio(filename,realscale)
     sample= oursong.sample
     rate = oursong.rate
     Spectre, Freq = get_fft(sample,rate)
@@ -413,16 +427,18 @@ def hz_to_note_array (frequencies_array):
 
 
 class Audio :
+    spectrum = 0
+    frequencies = 0
+    rate = 0
     real_scale=0
-    spectrum=0
-    frequencies=0
     max_notes=0
     scale=0
     peaks=np.ones(1)
     peaks_value=0
     peaks_hz=0
     peaks_notes=0
-    rate=0
+    max_notes_number=0
+    max_notes_char = []
 
     def __init__(self, filename, scale):
         self.real_scale=scale
@@ -437,9 +453,15 @@ class Audio :
     def find_peaks(self):
         peaks, _ = find_peaks(self.spectrum, height=max(self.spectrum) / 4)
         self.peaks=peaks
-        self.peaks_value=self.frequencies[peaks]
+        self.peaks_value=self.spectrum[peaks]
         self.peaks_hz = self.frequencies[peaks]
         self.peaks_notes = hz_to_note_array(self.peaks_hz)
+
+    def find_max_notes_peaks(self):
+
+        self.max_notes_char= hz_to_note_array(self.peaks_hz)
+        self.max_notes_number=LettersToNumbers(self.max_notes_char)
+
 
     def fft_show(self):
         Show_fft(self.spectrum, self.frequencies, self.real_scale, self.peaks)
