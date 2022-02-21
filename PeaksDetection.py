@@ -9,6 +9,14 @@ from FFTfunction import *
 from Class import *
 
 from scipy.misc import electrocardiogram
+
+real_scale="Cd"
+sample_number=7
+type_of_sample="CleanGuitar"
+
+
+file_input = get_sample_filepath(real_scale,sample_number,type_of_sample)
+
 x = electrocardiogram()[2000:4000]
 type(x)
 
@@ -72,10 +80,9 @@ def Show_fft(Spectre,Freq,notescale,peaks): #need to implemant marker with the g
     plt.plot(Freq[peaks], Spectre[peaks], 'x')
     plt.show()
 
+filename = file_input
 
-filename = 'C.wav'
-
-realscale = 'C'
+realscale = real_scale
 
 listscale = ["C", "Cd", "D", "Dd", "E", "F", "Fd", "G", "Gd", "A", "Ad", "B"]
 print("every note is associated to a number as :")
@@ -102,7 +109,11 @@ detected_frequencies = Freq[peaks]
 
 print('Frequencies detected in the spectre : ', detected_frequencies)
 
+detected_notes=hz_to_note_array(detected_frequencies)
+print("Peaks (Hz)", detected_frequencies)
+print("Peaks (note)", detected_notes)
+
 Show_fft(Spectre,Freq,realscale,peaks)
 
-print(peaks)
 
+print("it goes here ?")

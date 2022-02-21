@@ -1,15 +1,8 @@
-import sklearn
-import scipy
-import scipy
-from scipy.fft import fft, ifft
-import matplotlib.pyplot as plt
-from matplotlib.pyplot import figure
-import numpy as np
-from scipy.io import wavfile
-import scipy.io
 
-from FFTfunction import get_fft
-from Class import *
+
+
+from FFTfunction import *
+
 
 
 def get_max_notes(filename): #usefull for full test of the method  FOR BOUBOU
@@ -178,6 +171,7 @@ def FindScaleFromvector(ScaleScoreVector):  # return a vector of better correspo
 
 
 def GetindexOfMaxNote(ChordsPowersScores, Numberofvalues):
+
     Sortedindexs = np.argsort(ChordsPowersScores)  # return the indexes of sorted list (ascending)
     Sortedindexs = Sortedindexs[::-1]  # indexes of the list (decreasing)
     Sortedindexs = Sortedindexs[0:Numberofvalues]
@@ -211,7 +205,14 @@ def NumberToLetter(scale):
     return letterscale
 
 
-def every_step_show(filename, realscale): #usefull for full test of the method
+def predict_scale_show(filename, realscale): #usefull for full test of the method
+    """
+            Compute the method to the end with print and graph
+            Parameter:
+            filename :  (str) filepath of the sample
+            realscale:  (str) groundtruth scale
+            return: (str) predicted scale
+            """
     oursong= Audio(filename)
     sample= oursong.sample
     rate = oursong.rate
@@ -220,11 +221,11 @@ def every_step_show(filename, realscale): #usefull for full test of the method
     #for i in range(0,1):
         #Spectre, Freq=GaussianFilterFFT(Spectre,Freq, [1,1,2,2,3,3,4,4,6,4,4,3,3,2,2,1,1])
 
-<<<<<<< HEAD
-    Spectre = scipy.ndimage.gaussian_filter1d(Spectre, 15*2, order=0)
-=======
+
+
+
     Spectre = scipy.ndimage.gaussian_filter1d(Spectre, 15*3, order=0)
->>>>>>> 3ac9f8640ed8f4a2db86236e8149b07f30f36ccd
+
 
 
     scores = score_for_everynote(Spectre, Freq,rate, 10)
@@ -250,6 +251,33 @@ def every_step_show(filename, realscale): #usefull for full test of the method
 
     scaleChar = compare_with_known_scale(scale)
     print("\n\n  The good scale is", scaleChar)
+    return scaleChar
+
+def predict_scale(filename, realscale): #usefull for full test of the method
+    """
+        Compute the method to the end, no print, no show
+        Parameter:
+        filename :  (str) filepath of the sample
+        realscale:  (str) groundtruth scale
+        return: (str) predicted scale
+        """
+    oursong= Audio(filename)
+    sample= oursong.sample
+    rate = oursong.rate
+    Spectre, Freq = get_fft(sample,rate)
+
+    Spectre = scipy.ndimage.gaussian_filter1d(Spectre, 15*3, order=0)
+
+    scores = score_for_everynote(Spectre, Freq,rate, 10)
+    listscale = ["C", "Cd", "D", "Dd", "E", "F", "Fd", "G", "Gd", "A", "Ad", "B"]
+
+
+    scale = GetindexOfMaxNote(scores, 7)
+
+
+    scaleChar = compare_with_known_scale(scale)
+
+    return scaleChar
 
 
 
@@ -303,4 +331,59 @@ def Show_fft(Spectre,Freq,notescale): #need to implemant marker with the good no
     plt.plot(Freq, Spectre)
     plt.show()
 
+def get_sample_filepath(real_scale,sample_number,type_of_sample):
+    """
+    Simple way to get filepath we can directly use
+    Parameter:
+    real_scale :  (str) as "C","Cd","D"...etc
+    sample_number:  (int) number the test sample (don't exced 10)
+    type_of_sample :  (str) type of bank, only "CleanGuitar" for now
+    return: (str) filepath, you also have the groundtruth with real_scale
+    """
+    filepath = "Sample/" + type_of_sample + "/" + real_scale + "/" + real_scale + str(sample_number) + ".wav"
+    return filepath
+
+
+def show_perf_test_one_scale(scale,number_of_sample,type_of_sample):
+    """
+        Test and show result of method for multiple samples of one scale
+        Parameter:
+        scale :  (str) as "C","Cd","D"...etc
+        number_of_sample:  (int) number of samples you want to test (don't exced 10)
+        type_of_sample :  (str) type of bank, only "CleanGuitar" for now
+        return: None, only printing the result for now
+        """
+
+    print("Result for",number_of_sample,type_of_sample,"samples of ",scale, "scale")
+    for n in range(0,number_of_sample):
+        file_path=get_sample_filepath(scale,n,type_of_sample)
+        print(predict_scale(file_path,scale))
+
+def hz_to_note (frequency):
+    """
+    Gave the nearest note corresponding to a frequency in Hz
+    Parameter:
+    frequency :  (float) Input freqency in Hz
+    return: (str) nearest note
+    """
+    listscale = ["C", "Cd", "D", "Dd", "E", "F", "Fd", "G", "Gd", "A", "Ad", "B"]
+    limit_of_octave1=(123+131)/2
+    while(frequency>limit_of_octave1):
+        frequency=frequency/2
+    note_ref=note_frequencies_construct()
+    diff_with_ref=np.zeros(len(note_ref))
+
+    for n in range(0,len(note_ref)):
+        diff_with_ref[n]=np.abs(note_ref[n]-frequency)
+
+    sorted_diff_index=np.argsort(diff_with_ref)
+    note=listscale[sorted_diff_index[0]]
+
+    return note
+
+def hz_to_note_array (frequencies_array):
+    notes_array = []
+    for n in range(0, len(frequencies_array)):
+        notes_array.append(hz_to_note(frequencies_array[n]))
+    return notes_array
 

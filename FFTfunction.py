@@ -7,8 +7,8 @@ from matplotlib.pyplot import figure
 import numpy as np
 from scipy.io import wavfile
 import scipy.io
-from Class import *
-from Function import *
+from scipy.signal import find_peaks
+
 
 
 def get_fft(audio_data, rate):  # return absolute FFT value and freqaxes
@@ -74,23 +74,7 @@ def normalizeFFT(spectre, axes):  # not working great for now
         spectre[n] = spectre[n] - (pente * n)
     return spectre, axes
 
-def GaussianFilterFFT(power, axes, ponderation):# depreciated, better use the scipy filter
-    WindowsSize = len(ponderation)
 
-    truncHalfW = int(WindowsSize / 2)
-
-    FilteredPow = np.zeros(len(power))
-
-    for n in range(truncHalfW, len(power) - truncHalfW):  # from 0 to Pow length - windows
-        windows = power[(n - truncHalfW):(n + truncHalfW + 1)]
-        windows = np.multiply(windows, ponderation)
-        FilteredPow[n] = np.mean(windows)
-
-    FilteredPow = FilteredPow[truncHalfW: (len(power) - truncHalfW + 1)]
-
-    axes = axes[truncHalfW: (len(power) - truncHalfW + 1)]
-
-    return FilteredPow, axes
 
 
 

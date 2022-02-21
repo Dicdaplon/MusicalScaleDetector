@@ -68,23 +68,3 @@ def TEST_FFTtrunc():
     assert len(Pow) == len(Axes), "Different lenght Power and FreqAxes after trunc function"
 
 
-def TEST_GaussianFilterFFT():
-    rate, audio_data = scipy.io.wavfile.read("Sinus440.wav", mmap=False)
-    Pow, Axes = get_fft(audio_data, rate)
-    MaxIndex = np.argsort(Pow)
-    MaxIndex = MaxIndex[::-1]
-    print(Axes[MaxIndex[0]])
-    # ponderation=[1,1,1,2,2,3,3,4,20,4,3,3,2,2,1,1,1]
-    # ponderation=[1,1,1]
-    ponderation = [1, 1, 1, 1, 1]
-    # ponderation=[1,1,1,1,1,1,1]
-    print(len(Axes))
-    print(len(Pow))
-    for i in range(0, 2):
-        Pow, Axes = GaussianFilterFFT(Pow, Axes, ponderation)
-    MaxIndex = np.argsort(Pow)
-    MaxIndex = MaxIndex[::-1]
-    print(len(Axes))
-    print(len(Pow))
-    print(Axes[MaxIndex[0]])
-
