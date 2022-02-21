@@ -25,7 +25,7 @@ from Class import *
 
 
 #choose your sample here
-real_scale="Cd"
+real_scale="C"
 sample_number=7
 type_of_sample="CleanGuitar"
 
