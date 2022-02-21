@@ -219,7 +219,7 @@ class Scale:
 
         root_english_notation = self.dict_notations[self.key_note]['english_notation']
 
-        Path(self.result_path).mkdir( exist_ok=True)
+        Path(self.result_path).mkdir(exist_ok=True, parents = True)
 
         F = ScaleGtr(scale=self.list_notes_english_notation, root=root_english_notation)
         F.customtuning(['E', 'A', 'D', 'G', 'B', 'E'])
@@ -246,7 +246,7 @@ class Scale:
             "list_of_corresponding_scales": self.list_corresponding_scales,
         }
 
-        Path(self.result_path).mkdir(exist_ok=True)
+        Path(self.result_path).mkdir(exist_ok=True, parents=True)
 
         csv_file = self.result_path + '/result.csv'
 

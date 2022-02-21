@@ -4,15 +4,14 @@ import os
 import pandas as pd
 # Choose your sample here
 
-real_scale = "C#"
+real_scale = "D"
 type_of_sample = "CleanGuitar"
-output_folder = 'outputs/'
+output_folder = 'outputs/' + type_of_sample + '/' + real_scale + '/'
 
 # Number of files for given sample and scale
 path_directory = './Sample/' + type_of_sample + '/' + real_scale
 list_files = os.listdir(path_directory) # dir is your directory path
 number_files = len(list_files)
-
 
 for number in range(0, number_files):
 
