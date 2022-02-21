@@ -1,8 +1,14 @@
 from Audio import *
 
+<<<<<<< HEAD
 
 #Starting Zone
 real_scale="C#"
+=======
+#choose your sample here
+
+real_scale="C"
+>>>>>>> 01c59949d897678849410cb80e83fd5f8c45ed62
 sample_number=7
 type_of_sample="CleanGuitar"
 
