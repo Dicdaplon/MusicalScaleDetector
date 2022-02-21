@@ -1,13 +1,6 @@
-
-
 #Internal libraries
 
-
-
-
 from FFTfunction import *
-
-
 
 def get_max_notes(filename): #usefull for full test of the method  FOR BOUBOU
     """
@@ -285,7 +278,7 @@ def predict_scale(filename, realscale): #usefull for full test of the method
 
 
 
-def Show_fft(Spectre,Freq,notescale): #need to implemant marker with the good note on the graph
+def Show_fft(Spectre,Freq,notescale,peaks): #need to implemant marker with the good note on the graph
     listscale = ["C", "Cd", "D", "Dd", "E", "F", "Fd", "G", "Gd", "A", "Ad", "B"]
     scale=0
     for i in range (0,len(listscale)):
@@ -333,6 +326,10 @@ def Show_fft(Spectre,Freq,notescale): #need to implemant marker with the good no
     fig.savefig('test2png.png', dpi=100)
     plt.xscale("log")
     plt.plot(Freq, Spectre)
+    print("Shhhh", peaks)
+    if (len(peaks) != 1):
+        print("tu va faire quoi ?")
+        plt.plot(Freq[peaks], Spectre[peaks], 'x')
     plt.show()
 
 def get_sample_filepath(real_scale,sample_number,type_of_sample):
@@ -398,6 +395,7 @@ class Audio :
     frequencies=0
     max_notes=0
     scale=0
+    peaks=np.ones(1)
     peaks_value=0
     peaks_hz=0
     peaks_notes=0
@@ -414,12 +412,13 @@ class Audio :
 
     def find_peaks(self):
         peaks, _ = find_peaks(self.spectrum, height=max(self.spectrum) / 4)
+        self.peaks=peaks
         self.peaks_value=self.frequencies[peaks]
         self.peaks_hz = self.frequencies[peaks]
         self.peaks_notes = hz_to_note_array(self.peaks_hz)
 
     def fft_show(self):
-        Show_fft(self.spectrum, self.frequencies, self.real_scale)
+        Show_fft(self.spectrum, self.frequencies, self.real_scale, self.peaks)
 
 
 

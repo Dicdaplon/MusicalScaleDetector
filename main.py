@@ -14,15 +14,14 @@ Audio_Obj.fft()
 Audio_Obj.fft_show()
 Audio_Obj.smooth_fft(30)
 Audio_Obj.fft_show()
-print(Audio_Obj.spectrum)
+print("peaks_value avant crea", Audio_Obj.peaks_value)
 Audio_Obj.find_peaks()
-print(Audio_Obj.peaks_value)
-print(Audio_Obj.peaks_hz)
-print(Audio_Obj.peaks_notes)
+Audio_Obj.fft_show()
+print("peaks_value après crea", Audio_Obj.peaks_value)
 
 
 
-"""""
+
 predict_scale(file_input,real_scale)
 
 
@@ -48,5 +47,3 @@ list_english_notation = new_scale.get_list_english_notation()
 new_scale.generate_fretboard_svg()
 
 new_scale.save_result_to_csv()
-
-"""

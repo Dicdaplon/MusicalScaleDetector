@@ -77,6 +77,9 @@ def Show_fft(Spectre,Freq,notescale,peaks): #need to implemant marker with the g
     fig.savefig('test2png.png', dpi=100)
     plt.xscale("log")
     plt.plot(Freq, Spectre)
+    if (peaks != 0):
+        plt.plot(Freq[peaks], Spectre[peaks], 'x')
+
     plt.plot(Freq[peaks], Spectre[peaks], 'x')
     plt.show()
 
