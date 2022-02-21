@@ -1,9 +1,10 @@
 from Audio import *
 from Scale import *
 import os
+import pandas as pd
 # Choose your sample here
 
-real_scale = "C"
+real_scale = "C#"
 type_of_sample = "CleanGuitar"
 output_folder = 'outputs/'
 
@@ -41,8 +42,7 @@ for number in range(0, number_files):
 
     print("output scale ", scale)
 
-    # To
-    scale = np.unique(scale)
+    scale = pd.unique(scale)
     scale = scale.astype(int)
 
     new_scale = Scale(scale, file_input, output_folder)

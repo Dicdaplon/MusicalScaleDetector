@@ -1,7 +1,7 @@
-date,21/02/2022 18:39:47
+date,21/02/2022 19:08:26
 initial_file_name,C3.wav
-key_note,C
-english_notation,"['C', 'C#', 'D', 'E', 'F', 'G', 'A', 'B']"
-intervals,"[1, 1, 2, 1, 2, 2, 2]"
-position_in_scale,"[0, 1, 2, 4, 5, 7, 9, 11]"
-list_of_corresponding_scales,[]
+key_note,G
+english_notation,"['G', 'A', 'B', 'C', 'C#', 'D', 'E', 'F']"
+intervals,"[2, 2, 1, 1, 1, 2, 1]"
+position_in_scale,"[0, 2, 4, 5, 6, 7, 9, 10]"
+list_of_corresponding_scales,"['MixolydianBebop2', 'LydianMixolydian1', 'LydianMixolydian2']"

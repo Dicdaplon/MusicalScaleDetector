@@ -1,7 +1,7 @@
-date,21/02/2022 18:39:50
+date,21/02/2022 19:08:29
 initial_file_name,C5.wav
-key_note,C
-english_notation,"['C', 'D', 'F', 'G', 'A']"
-intervals,"[2, 3, 2, 2]"
-position_in_scale,"[0, 2, 5, 7, 9]"
-list_of_corresponding_scales,"['Yo', 'Slendro', 'Sus4']"
+key_note,A
+english_notation,"['A', 'C', 'D', 'F', 'G']"
+intervals,"[3, 2, 3, 2]"
+position_in_scale,"[0, 3, 5, 8, 10]"
+list_of_corresponding_scales,['M3MjPentatonic']

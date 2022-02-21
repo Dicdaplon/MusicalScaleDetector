@@ -376,6 +376,7 @@ def Show_fft(Spectre,Freq,notescale,peaks, file_path=None): #need to implemant m
 
         Path(file_path).mkdir(exist_ok=True)
         plt.savefig(file_path + "/spectrogram.png", dpi=100)
+        plt.clf()
 
 
 def get_sample_filepath(real_scale,sample_number,type_of_sample):
