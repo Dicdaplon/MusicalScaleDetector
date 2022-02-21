@@ -4,9 +4,9 @@ import scipy.io
 
 from scipy.signal import find_peaks
 import matplotlib.pyplot as plt
-from Function import *
+
 from FFTfunction import *
-from Class import *
+from Audio import *
 
 from scipy.misc import electrocardiogram
 

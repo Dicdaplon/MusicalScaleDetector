@@ -10,9 +10,9 @@ from scipy.io import wavfile
 import scipy.io
 
 
-from Function import *
+
 from FFTfunction import *
-from Class import *
+from Audio import *
 
 
 

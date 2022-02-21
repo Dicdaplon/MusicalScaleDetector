@@ -1,28 +1,4 @@
-"""""  Lot of circular import error, i'm actually trying to clean it but in conserve here all original import for now
-import sklearn
-import scipy
-import scipy
-from scipy.fft import fft, ifft
-import matplotlib.pyplot as plt
-from matplotlib.pyplot import figure
-import numpy as np
-from scipy.io import wavfile
-import scipy.io
-import os
-import unittest
-
-#Internal libraries
-from GenerateData import *
-from Function import *
-from FFTfunction import *
-from TEST import *
-from Scale import Scale
-from Class import *
-#from PeaksDetection import x
-"""
-
-from Class import *
-
+from Audio import *
 
 #choose your sample here
 real_scale="Cd"

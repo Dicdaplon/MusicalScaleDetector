@@ -1,17 +1,21 @@
 
 
+#Internal libraries
+
+
+
 
 from FFTfunction import *
 
 
 
 def get_max_notes(filename): #usefull for full test of the method  FOR BOUBOU
-    """ 
+    """
     get_max_notes computes a wav file and extract the notes
     Parameter:
     filename: wav file
 
-    return: list of detected notes 
+    return: list of detected notes
     """
 
     listscale = ["C", "Cd", "D", "Dd", "E", "F", "Fd", "G", "Gd", "A", "Ad", "B"]
@@ -386,4 +390,36 @@ def hz_to_note_array (frequencies_array):
     for n in range(0, len(frequencies_array)):
         notes_array.append(hz_to_note(frequencies_array[n]))
     return notes_array
+
+
+class Audio :
+    real_scale=0
+    spectrum=0
+    frequencies=0
+    max_notes=0
+    scale=0
+    peaks_value=0
+    peaks_hz=0
+    peaks_notes=0
+
+    def __init__(self, filename, scale):
+        self.real_scale=scale
+        self.rate, self.sample = scipy.io.wavfile.read(filename, mmap=False)
+
+    def fft(self):
+        self.spectrum,self.frequencies =get_fft(self.sample, self.rate)
+
+    def smooth_fft(self, smoothing_value):
+        self.spectrum = scipy.ndimage.gaussian_filter1d(self.spectrum, smoothing_value, order=0)
+
+    def find_peaks(self):
+        peaks, _ = find_peaks(self.spectrum, height=max(self.spectrum) / 4)
+        self.peaks_value=self.frequencies[peaks]
+        self.peaks_hz = self.frequencies[peaks]
+        self.peaks_notes = hz_to_note_array(self.peaks_hz)
+
+    def fft_show(self):
+        Show_fft(self.spectrum, self.frequencies, self.real_scale)
+
+
 
