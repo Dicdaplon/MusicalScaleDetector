@@ -2,6 +2,29 @@
 
 from FFTfunction import *
 
+
+dict_notations_old = {
+            0: {"english_notation": 'C', "latin_notation": 'Do'},
+            1: {"english_notation": 'C#', "latin_notation": 'Do#'},
+            2: {"english_notation": 'D', "latin_notation": 'Re'},
+            3: {"english_notation": 'D#', "latin_notation": 'Re#'},
+            4: {"english_notation": 'E', "latin_notation": 'Mi'},
+            5: {"english_notation": 'F', "latin_notation": 'Fa'},
+            6: {"english_notation": 'F#', "latin_notation": 'Fa#'},
+            7: {"english_notation": 'G', "latin_notation": 'Sol'},
+            8: {"english_notation": 'G#', "latin_notation": 'Sol#'},
+            9: {"english_notation": 'A', "latin_notation": 'La'},
+            10: {"english_notation": 'A#', "latin_notation": 'La#'},
+            11: {"english_notation": 'B', "latin_notation": 'Si'},
+        }
+
+
+def listscale_from_dict():
+    listscale=[]
+    for n in range(0,12):
+        listscale.append(dict_notations_old[n]["english_notation"])
+    return listscale
+
 def get_max_notes(filename): #usefull for full test of the method  FOR BOUBOU
     """
     get_max_notes computes a wav file and extract the notes
@@ -11,7 +34,7 @@ def get_max_notes(filename): #usefull for full test of the method  FOR BOUBOU
     return: list of detected notes
     """
 
-    listscale = ["C", "Cd", "D", "Dd", "E", "F", "Fd", "G", "Gd", "A", "Ad", "B"]
+    listscale=listscale_from_dict()
     print("every note is associated to a number as :")
     print(listscale)
     print([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11])
@@ -71,7 +94,7 @@ def windows_hz_to_n(hz,freqaxe): #transform a windows in hz to a number of sampl
 
 
 def note_score(spectre, freq, rate, note, windows):  # return summed score for a note C,Cd,D...
-    listscale = ["C", "Cd", "D", "Dd", "E", "F", "Fd", "G", "Gd", "A", "Ad", "B"]
+    listscale=listscale_from_dict()
     gamme = note_frequencies_construct()  # all the normalize value, C to B (Do vers Si) in Hz
     noteindex = listscale.index(note)  # reach for the indexes of the searched note (ex Cd -> 1)
     powerscale = 0
@@ -89,9 +112,11 @@ def note_score(spectre, freq, rate, note, windows):  # return summed score for a
     return powerscale
 
 
+
 def score_for_everynote(spectre, freq,rate, windows):  # return vector of summed scores for each note C,Cd,D...
     powersvector = np.zeros(12);
-    listscale = ["C", "Cd", "D", "Dd", "E", "F", "Fd", "G", "Gd", "A", "Ad", "B"]
+
+    listscale=listscale_from_dict()
     n = 0
     for note in listscale:
         powersvector[n] = note_score(spectre, freq, rate, note, 30)
@@ -99,7 +124,7 @@ def score_for_everynote(spectre, freq,rate, windows):  # return vector of summed
     return powersvector
 
 def compare_with_known_scale (Scalein):
-    listscale = ["C", "Cd", "D", "Dd", "E", "F", "Fd", "G", "Gd", "A", "Ad", "B"]
+    listscale=listscale_from_dict()
     scoremax=0
     nmax=0
     for n in range(0,len(listscale)):
@@ -163,7 +188,7 @@ def FindScale(our):  # return a vector of better correspondance with known scale
 def FindScaleFromvector(ScaleScoreVector):  # return a vector of better correspondance with known scale
     SortedScaleindex = np.argsort(ScaleScoreVector)
     SortedScaleindex = SortedScaleindex[::-1]
-    listscale = ["C", "Cd", "D", "Dd", "E", "F", "Fd", "G", "Gd", "A", "Ad", "B"]
+    listscale=listscale_from_dict()
     return listscale[SortedScaleindex[0]]
 
 
@@ -195,7 +220,7 @@ def GetScale(filename):
 
 
 def NumberToLetter(scale):
-    listscale = ["C", "Cd", "D", "Dd", "E", "F", "Fd", "G", "Gd", "A", "Ad", "B"]
+    listscale=listscale_from_dict()
     letterscale = ["0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0"]
     for n in range(0, len(scale)):
         letterscale[n] = listscale[scale[n]]
@@ -226,7 +251,7 @@ def predict_scale_show(filename, realscale): #usefull for full test of the metho
 
 
     scores = score_for_everynote(Spectre, Freq,rate, 10)
-    listscale = ["C", "Cd", "D", "Dd", "E", "F", "Fd", "G", "Gd", "A", "Ad", "B"]
+    listscale=listscale_from_dict()
 
     for n in range(0, len(listscale)):
         print(listscale[n]," ", scores[n],"     ")
@@ -266,7 +291,7 @@ def predict_scale(filename, realscale): #usefull for full test of the method
     Spectre = scipy.ndimage.gaussian_filter1d(Spectre, 15*3, order=0)
 
     scores = score_for_everynote(Spectre, Freq,rate, 10)
-    listscale = ["C", "Cd", "D", "Dd", "E", "F", "Fd", "G", "Gd", "A", "Ad", "B"]
+    listscale=listscale_from_dict()
 
 
     scale = GetindexOfMaxNote(scores, 7)
@@ -326,9 +351,7 @@ def Show_fft(Spectre,Freq,notescale,peaks): #need to implemant marker with the g
     fig.savefig('test2png.png', dpi=100)
     plt.xscale("log")
     plt.plot(Freq, Spectre)
-    print("Shhhh", peaks)
     if (len(peaks) != 1):
-        print("tu va faire quoi ?")
         plt.plot(Freq[peaks], Spectre[peaks], 'x')
     plt.show()
 
@@ -399,6 +422,7 @@ class Audio :
     peaks_value=0
     peaks_hz=0
     peaks_notes=0
+    rate=0
 
     def __init__(self, filename, scale):
         self.real_scale=scale
