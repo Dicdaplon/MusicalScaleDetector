@@ -4,6 +4,7 @@ import csv
 from fretboardgtr import ScaleGtr
 from pathlib import Path
 from datetime import datetime
+import os
 
 
 def get_interval(first_note, second_note):
@@ -33,7 +34,7 @@ class Scale:
 
     """
 
-    def __init__(self, list_input_notes, file_name='default', key_note=None):
+    def __init__(self, list_input_notes, input_file_path, output_directory, key_note=None):
         """
         Constructor of the Scale class, compute the list of note index in the right order and with the key note as
         the first note if none key_note is specified
@@ -93,7 +94,13 @@ class Scale:
         self.list_positions_in_scale = []
         self.list_corresponding_scales = []
 
-        self.file_name = file_name
+        self.output_directory = output_directory
+
+        # Extraction of the file name in the given path without extension
+        self.file_name = os.path.basename(input_file_path)
+
+        # Generation of result path
+        self.result_path = "./" + self.output_directory + self.file_name
 
     def get_list_intervals(self):
         """
@@ -212,12 +219,12 @@ class Scale:
 
         root_english_notation = self.dict_notations[self.key_note]['english_notation']
 
-        Path("./" + self.file_name).mkdir( exist_ok=True)
+        Path(self.result_path).mkdir( exist_ok=True)
 
         F = ScaleGtr(scale=self.list_notes_english_notation, root=root_english_notation)
         F.customtuning(['E', 'A', 'D', 'G', 'B', 'E'])
         F.theme(show_note_name=True)
-        F.pathname(self.file_name + '/fretboard.svg')
+        F.pathname(self.result_path + '/fretboard.svg')
         F.draw()
         F.save()
 
@@ -236,13 +243,12 @@ class Scale:
             "english_notation": self.list_notes_english_notation,
             "intervals": self.list_intervals,
             "position_in_scale": self.list_positions_in_scale,
+            "list_of_corresponding_scales": self.list_corresponding_scales,
         }
 
-        directory_path = "./" + self.file_name
+        Path(self.result_path).mkdir(exist_ok=True)
 
-        Path(directory_path).mkdir(exist_ok=True)
-
-        csv_file = directory_path + '/result.csv'
+        csv_file = self.result_path + '/result.csv'
 
         try:
             with open(csv_file, 'w') as csvfile:

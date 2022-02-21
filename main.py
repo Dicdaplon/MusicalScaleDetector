@@ -1,27 +1,18 @@
 from Audio import *
 from Scale import *
-import os
-#Starting Zone
-real_scale="C#"
 
 #choose your sample here
 
 real_scale="C"
 
-sample_number=7
+sample_number=2
 type_of_sample="CleanGuitar"
 
 
 #Don't touch zone
 file_input = get_sample_filepath(real_scale,sample_number,type_of_sample)
 
-
-
-
-
-
-
-
+print('file_input', file_input)
 
 #Have fun zone (supress and test all you want)
 Audio_Obj = Audio(file_input,real_scale)
@@ -37,16 +28,19 @@ scale=Audio_Obj.max_notes_char
 #predict_scale(file_input,real_scale)
 
 
-show_perf_test_one_scale("C",10,"CleanGuitar")
+show_perf_test_one_scale("C", 10, "CleanGuitar")
 
-predict_scale_show(file_input,real_scale)
+predict_scale_show(file_input, real_scale)
 
 scale=Audio_Obj.max_notes_number
 
+print("output scale ", scale)
 
-target_folder = 'outputs/' + os.path.splitext(file_input)[0]
+scale = np.unique(scale)
 
-new_scale = Scale(scale, target_folder)
+output_folder = 'outputs/'
+
+new_scale = Scale(scale, file_input, output_folder)
 
 list_intervals = new_scale.get_list_intervals()
 
