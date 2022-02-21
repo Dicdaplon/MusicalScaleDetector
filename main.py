@@ -13,6 +13,7 @@ path_directory = './Sample/' + type_of_sample + '/' + real_scale
 list_files = os.listdir(path_directory) # dir is your directory path
 number_files = len(list_files)
 
+
 for number in range(0, number_files):
 
     sample_number = number
