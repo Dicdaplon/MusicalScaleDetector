@@ -1,4 +1,5 @@
 from Audio import *
+from fretboardgtr import ScaleGtr
 from Scale import *
 import os
 import pandas as pd
@@ -19,13 +20,7 @@ path_directory = './Sample/' + type_of_sample + '/' + real_scale
 list_files = os.listdir(path_directory) # dir is your directory path
 number_files = len(list_files)
 
-for number in range(0, number_files):
-
-
-
-
-
-real_scale = "C"
+real_scale = "D"
 type_of_sample = "Sinus"
 
 file_input=get_sample_filepath(real_scale,4,type_of_sample)
@@ -33,7 +28,11 @@ print("file_input", file_input)
 Audio_Obj = Audio(file_input, real_scale)
 Audio_Obj.fft()
 Audio_Obj.smooth_fft(25)
-Audio_Obj.find_peaks()
+Audio_Obj.find_peaks_and_unique()
 Audio_Obj.sort_peaks()
+print(Audio_Obj.peaks_notes)
+print(Audio_Obj.peaks_value)
+print(Audio_Obj.unique_max_notes)
+print(Audio_Obj.unique_max_notes_power)
 Audio_Obj.fft_show()
 

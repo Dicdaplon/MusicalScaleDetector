@@ -321,7 +321,7 @@ def predict_scale(filename, realscale, output_folder): #usefull for full test of
 
 
 def Print_fft(Spectre,Freq,notescale,peaks, file_path=None): #need to implemant marker with the good note on the graph
-    listscale = ["C", "Cd", "D", "Dd", "E", "F", "Fd", "G", "Gd", "A", "Ad", "B"]
+    listscale = listscale_from_dict()
     scale=0
     for i in range (0,len(listscale)):
         if(listscale[i]==notescale):
@@ -379,7 +379,7 @@ def Print_fft(Spectre,Freq,notescale,peaks, file_path=None): #need to implemant 
         plt.clf()
 
 def Show_fft(Spectre,Freq,notescale,peaks, file_path=None): #need to implemant marker with the good note on the graph
-    listscale = ["C", "Cd", "D", "Dd", "E", "F", "Fd", "G", "Gd", "A", "Ad", "B"]
+    listscale = listscale_from_dict()
     scale=0
     for i in range (0,len(listscale)):
         if(listscale[i]==notescale):
@@ -504,13 +504,39 @@ def sort_peaks(peaks_value,peaks_hz):
     return new_peaks_value, new_peaks_hz, new_peaks_char
 
 
+def unique_peaks(peaks_value,peaks_note):
+    listscale=listscale_from_dict()
+    new_peaks_value=np.zeros(len(listscale))
+    new_peaks_note = []
+    for n in range(0,len(listscale)) :
+        new_peaks_note.append(listscale[n])
+        sum = 0
+        for m in range(0,len(peaks_value)):
+            if listscale[n]== peaks_note[m]:
+                sum = sum+peaks_value[m]
+        new_peaks_value[n]=sum
+
+    new_peaks_note2= []
+    index_max=np.argsort(new_peaks_value)
+    index_max=index_max[::-1]
+    for n in range(0,len(new_peaks_note)):
+        new_peaks_note2.append(new_peaks_note[index_max[n]])
+
+    new_peaks_value=np.sort(new_peaks_value)
+    new_peaks_value=new_peaks_value[::-1]
+
+    return new_peaks_value, new_peaks_note2
+
+
+
 
 class Audio :
     spectrum = 0
     frequencies = 0
     rate = 0
     real_scale=0
-    max_notes=0
+    unique_max_notes=0
+    unique_max_notes_power=0
     scale=0
     peaks=np.ones(1)
     peaks_value=0
@@ -543,15 +569,18 @@ class Audio :
     def smooth_fft(self, smoothing_value):
         self.spectrum = scipy.ndimage.gaussian_filter1d(self.spectrum, smoothing_value, order=0)
 
-    def find_peaks(self):
+    def find_peaks_and_unique(self):
         peaks, _ = find_peaks(self.spectrum, height=max(self.spectrum) / 4)
         self.peaks=peaks
         self.peaks_value=self.spectrum[peaks]
         self.peaks_hz = self.frequencies[peaks]
         self.peaks_notes = hz_to_note_array(self.peaks_hz)
+        self.unique_max_notes_power,self.unique_max_notes=unique_peaks(self.peaks_value,self.peaks_notes)
 
     def sort_peaks(self):
+
         self.peaks_value,self.peaks_hz, self.peaks_notes=  sort_peaks(self.peaks_value, self.peaks_hz)
+
 
     def find_max_notes_peaks(self):
 
