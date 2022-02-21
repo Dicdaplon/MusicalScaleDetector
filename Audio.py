@@ -320,7 +320,7 @@ def predict_scale(filename, realscale, output_folder): #usefull for full test of
 
 
 
-def Show_fft(Spectre,Freq,notescale,peaks, file_path=None): #need to implemant marker with the good note on the graph
+def Print_fft(Spectre,Freq,notescale,peaks, file_path=None): #need to implemant marker with the good note on the graph
     listscale = ["C", "Cd", "D", "Dd", "E", "F", "Fd", "G", "Gd", "A", "Ad", "B"]
     scale=0
     for i in range (0,len(listscale)):
@@ -377,6 +377,59 @@ def Show_fft(Spectre,Freq,notescale,peaks, file_path=None): #need to implemant m
         Path(file_path).mkdir(exist_ok=True)
         plt.savefig(file_path + "/spectrogram.png", dpi=100)
         plt.clf()
+
+def Show_fft(Spectre,Freq,notescale,peaks, file_path=None): #need to implemant marker with the good note on the graph
+    listscale = ["C", "Cd", "D", "Dd", "E", "F", "Fd", "G", "Gd", "A", "Ad", "B"]
+    scale=0
+    for i in range (0,len(listscale)):
+        if(listscale[i]==notescale):
+            scale=i
+    gamme = note_frequencies_construct()
+    Biglistscale=listscale
+
+    for n in range (0,scale):
+        gamme=np.multiply(gamme,1.05946)#adapt scale frequency to selected scale
+        listscale=np.concatenate([listscale,listscale])
+    listscale=listscale[scale:12+scale]
+
+
+    goodnote=[0,2,4,5,7,9,11]
+    badnote=[1,3,6,8,10]
+
+    Biglistscale=listscale
+    Biggamme=gamme
+    Biggoodnote=goodnote
+    Bigbadnote=badnote
+
+    for numberofscale in range(0,3):
+        gamme=gamme*2
+        Biggamme = np.concatenate([Biggamme, gamme])
+        Biglistscale=np.concatenate([Biglistscale,listscale])
+        goodnote=np.add(goodnote,12)
+        Biggoodnote = np.concatenate([Biggoodnote,goodnote])
+        badnote = np.add(badnote, 12)
+        Bigbadnote = np.concatenate([Bigbadnote,badnote])
+
+    plt.grid()
+    maxfft=np.max(Spectre)
+    plt.xlim(60,1000)
+    for n in  Biggoodnote:
+        plt.vlines(Biggamme[n], 0, maxfft, linestyles="dotted", colors="green")
+        plt.text(Biggamme[n], 0, Biglistscale[n], color="green", fontsize=12)
+    for n in  Bigbadnote:
+        plt.vlines(Biggamme[n], 0, maxfft, linestyles="dotted", colors="red")
+        plt.text(Biggamme[n], 0, Biglistscale[n], color="red", fontsize=12)
+
+
+    fig = plt.gcf()
+    fig.set_size_inches(18.5, 10.5)
+    #fig.savefig('test2png.png', dpi=100)
+    plt.xscale("log")
+    plt.plot(Freq, Spectre)
+    if (len(peaks) != 1):
+        plt.plot(Freq[peaks], Spectre[peaks], 'x')
+
+    plt.show()
 
 
 def get_sample_filepath(real_scale,sample_number,type_of_sample):
@@ -436,6 +489,22 @@ def hz_to_note_array (frequencies_array):
     return notes_array
 
 
+def sort_peaks(peaks_value,peaks_hz):
+    max_value_index=np.argsort(peaks_value)
+    max_value_index=max_value_index[::-1]
+    peaks_value=np.sort(peaks_value)
+    new_peaks_value=peaks_value[::-1]
+
+    new_peaks_hz=np.zeros(len(peaks_hz))
+    for n in range(0,len(max_value_index)) :
+        new_peaks_hz[n]=peaks_hz[max_value_index[n]]
+
+    new_peaks_char=hz_to_note_array(new_peaks_hz)
+
+    return new_peaks_value, new_peaks_hz, new_peaks_char
+
+
+
 class Audio :
     spectrum = 0
     frequencies = 0
@@ -463,9 +532,13 @@ class Audio :
         # Generation of result path
         self.result_path = "./" + self.output_directory + self.file_name
 
+    def __init__(self, filename, scale):
+        self.real_scale = scale
+        self.rate, self.sample = scipy.io.wavfile.read(filename, mmap=False)
 
     def fft(self):
         self.spectrum,self.frequencies =get_fft(self.sample, self.rate)
+        self.spectrum,self.frequencies =fft_trunc(self.spectrum,self.frequencies,0,18000)
 
     def smooth_fft(self, smoothing_value):
         self.spectrum = scipy.ndimage.gaussian_filter1d(self.spectrum, smoothing_value, order=0)
@@ -477,6 +550,9 @@ class Audio :
         self.peaks_hz = self.frequencies[peaks]
         self.peaks_notes = hz_to_note_array(self.peaks_hz)
 
+    def sort_peaks(self):
+        self.peaks_value,self.peaks_hz, self.peaks_notes=  sort_peaks(self.peaks_value, self.peaks_hz)
+
     def find_max_notes_peaks(self):
 
         self.max_notes_char= hz_to_note_array(self.peaks_hz)
@@ -484,6 +560,9 @@ class Audio :
 
 
     def fft_show(self):
+        Show_fft(self.spectrum, self.frequencies, self.real_scale, self.peaks)
+
+    def fft_print(self):
         Show_fft(self.spectrum, self.frequencies, self.real_scale, self.peaks, self.result_path)
 
 

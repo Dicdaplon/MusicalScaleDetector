@@ -4,8 +4,8 @@ import os
 import pandas as pd
 # Choose your sample here
 
-real_scale = "C#"
-type_of_sample = "CleanGuitar"
+real_scale = "C"
+type_of_sample = "Sinus"
 output_folder = 'outputs/'
 
 # Number of files for given sample and scale
@@ -14,9 +14,27 @@ list_files = os.listdir(path_directory) # dir is your directory path
 number_files = len(list_files)
 
 
-for number in range(0, number_files):
 
-    sample_number = number
+
+
+
+real_scale = "C"
+type_of_sample = "Sinus"
+
+file_input=get_sample_filepath(real_scale,4,type_of_sample)
+print("file_input", file_input)
+Audio_Obj = Audio(file_input, real_scale)
+Audio_Obj.fft()
+Audio_Obj.smooth_fft(25)
+Audio_Obj.find_peaks()
+Audio_Obj.sort_peaks()
+Audio_Obj.fft_show()
+
+
+
+for number in range(0,4):
+
+    sample_number = 4
 
     # Don't touch zone
     file_input = get_sample_filepath(real_scale, sample_number, type_of_sample)
@@ -24,8 +42,9 @@ for number in range(0, number_files):
     print('file_input', file_input)
 
     # Have fun zone (supress and test all you want)
+    [""]
+    print("peaks before", )
     Audio_Obj = Audio(file_input, output_folder, real_scale)
-    print(Audio_Obj.sample)
     Audio_Obj.fft()
     Audio_Obj.smooth_fft(30)
     Audio_Obj.find_peaks()
