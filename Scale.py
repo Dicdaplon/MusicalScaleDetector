@@ -228,7 +228,6 @@ class Scale:
         F.draw()
         F.save()
 
-
     def save_result_to_csv(self):
         """
         Save the main informations from the scale in a csv file in the specified directory folder
@@ -239,6 +238,7 @@ class Scale:
 
         dict_result = {
             "date": dt_string,
+            "initial_file_name": self.file_name,
             "key_note": self.dict_notations[self.key_note]['english_notation'],
             "english_notation": self.list_notes_english_notation,
             "intervals": self.list_intervals,

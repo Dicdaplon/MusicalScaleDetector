@@ -1,6 +1,8 @@
 #Internal libraries
 
 from FFTfunction import *
+import os
+from pathlib import Path
 
 
 dict_notations_old = {
@@ -240,18 +242,18 @@ def LetterToNumber(note_str):
 
 def LettersToNumbers(scaleChar):
     listscale=listscale_from_dict()
-    print(scaleChar)
+    print("Detected notes " , scaleChar)
 
     number_scale=np.zeros(len(scaleChar))
     for n in range(0,len(scaleChar)):
         actual_str=scaleChar[n]
-        print(actual_str)
+        #print(actual_str)
         number_scale[n]=int(LetterToNumber(actual_str))
 
     return number_scale
 
 
-def predict_scale_show(filename, realscale): #usefull for full test of the method
+def predict_scale_show(filename, realscale, output_directory): #usefull for full test of the method
     """
             Compute the method to the end with print and graph
             Parameter:
@@ -259,7 +261,7 @@ def predict_scale_show(filename, realscale): #usefull for full test of the metho
             realscale:  (str) groundtruth scale
             return: (str) predicted scale
             """
-    oursong= Audio(filename,realscale)
+    oursong= Audio(filename,realscale, output_directory)
 
     oursong.fft()
     oursong.smooth_fft(45)
@@ -289,7 +291,8 @@ def predict_scale_show(filename, realscale): #usefull for full test of the metho
     print("\n\n  The good scale is", scaleChar)
     return scaleChar
     oursong.fft_show()
-def predict_scale(filename, realscale): #usefull for full test of the method
+
+def predict_scale(filename, realscale, output_folder): #usefull for full test of the method
     """
         Compute the method to the end, no print, no show
         Parameter:
@@ -297,7 +300,7 @@ def predict_scale(filename, realscale): #usefull for full test of the method
         realscale:  (str) groundtruth scale
         return: (str) predicted scale
         """
-    oursong= Audio(filename,realscale)
+    oursong= Audio(filename,realscale, output_folder)
     sample= oursong.sample
     rate = oursong.rate
     Spectre, Freq = get_fft(sample,rate)
@@ -317,7 +320,7 @@ def predict_scale(filename, realscale): #usefull for full test of the method
 
 
 
-def Show_fft(Spectre,Freq,notescale,peaks): #need to implemant marker with the good note on the graph
+def Show_fft(Spectre,Freq,notescale,peaks, file_path=None): #need to implemant marker with the good note on the graph
     listscale = ["C", "Cd", "D", "Dd", "E", "F", "Fd", "G", "Gd", "A", "Ad", "B"]
     scale=0
     for i in range (0,len(listscale)):
@@ -362,12 +365,18 @@ def Show_fft(Spectre,Freq,notescale,peaks): #need to implemant marker with the g
 
     fig = plt.gcf()
     fig.set_size_inches(18.5, 10.5)
-    fig.savefig('test2png.png', dpi=100)
+    #fig.savefig('test2png.png', dpi=100)
     plt.xscale("log")
     plt.plot(Freq, Spectre)
     if (len(peaks) != 1):
         plt.plot(Freq[peaks], Spectre[peaks], 'x')
-    plt.show()
+
+    # if a file_path is given
+    if file_path is not None:
+
+        Path(file_path).mkdir(exist_ok=True)
+        plt.savefig(file_path + "/spectrogram.png", dpi=100)
+
 
 def get_sample_filepath(real_scale,sample_number,type_of_sample):
     """
@@ -382,7 +391,7 @@ def get_sample_filepath(real_scale,sample_number,type_of_sample):
     return filepath
 
 
-def show_perf_test_one_scale(scale,number_of_sample,type_of_sample):
+def show_perf_test_one_scale(scale, number_of_sample, type_of_sample, output_directory):
     """
         Test and show result of method for multiple samples of one scale
         Parameter:
@@ -395,7 +404,7 @@ def show_perf_test_one_scale(scale,number_of_sample,type_of_sample):
     print("Result for",number_of_sample,type_of_sample,"samples of ",scale, "scale")
     for n in range(0,number_of_sample):
         file_path=get_sample_filepath(scale,n,type_of_sample)
-        print(predict_scale(file_path,scale))
+        print(predict_scale(file_path, scale, output_directory))
 
 def hz_to_note (frequency):
     """
@@ -440,9 +449,19 @@ class Audio :
     max_notes_number=0
     max_notes_char = []
 
-    def __init__(self, filename, scale):
+    def __init__(self, filename, output_directory, scale):
         self.real_scale=scale
         self.rate, self.sample = scipy.io.wavfile.read(filename, mmap=False)
+
+        # File result management
+        self.output_directory = output_directory
+
+        # Extraction of the file name in the given path without extension
+        self.file_name = os.path.basename(filename)
+
+        # Generation of result path
+        self.result_path = "./" + self.output_directory + self.file_name
+
 
     def fft(self):
         self.spectrum,self.frequencies =get_fft(self.sample, self.rate)
@@ -464,7 +483,7 @@ class Audio :
 
 
     def fft_show(self):
-        Show_fft(self.spectrum, self.frequencies, self.real_scale, self.peaks)
+        Show_fft(self.spectrum, self.frequencies, self.real_scale, self.peaks, self.result_path)
 
 
 

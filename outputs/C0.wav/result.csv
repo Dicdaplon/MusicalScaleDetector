@@ -1,0 +1,7 @@
+date,21/02/2022 18:39:42
+initial_file_name,C0.wav
+key_note,C
+english_notation,"['C', 'C#', 'D', 'E', 'F', 'G', 'G#', 'A']"
+intervals,"[1, 1, 2, 1, 2, 1, 1]"
+position_in_scale,"[0, 1, 2, 4, 5, 7, 8, 9]"
+list_of_corresponding_scales,['ChromaticPermutedDiatonic']
