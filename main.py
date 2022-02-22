@@ -21,13 +21,13 @@ list_files = os.listdir(path_directory) # dir is your directory path
 number_files = len(list_files)
 
 real_scale = "D"
-type_of_sample = "Sinus"
+type_of_sample = "CleanGuitar"
 
-file_input=get_sample_filepath(real_scale,4,type_of_sample)
+file_input=get_sample_filepath(real_scale,6,type_of_sample)
 print("file_input", file_input)
 Audio_Obj = Audio(file_input, real_scale)
 Audio_Obj.fft()
-Audio_Obj.smooth_fft(25)
+Audio_Obj.smooth_fft(10)
 Audio_Obj.find_peaks_and_unique()
 Audio_Obj.sort_peaks()
 print(Audio_Obj.peaks_notes)

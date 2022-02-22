@@ -72,6 +72,11 @@ def get_max_notes(filename): #usefull for full test of the method  FOR BOUBOU
     return scale
 
 def note_frequencies_construct(): #construct in Hz every note C to B including the # notes
+    """
+    Construct the frequencies (Hz) in the Chromatic scale from C
+    Parameter: None
+    return: (float) array of frequencies, size 12
+    """
     gamme = np.zeros(12)
     gamme[0] = 65.4  # C (Do) at 32.7 Hz
 
@@ -81,6 +86,15 @@ def note_frequencies_construct(): #construct in Hz every note C to B including t
 
 
 def frequence_to_index(frequence, octave, freqaxe,rate):
+    """
+    Convert a frequency (Hz), doubled at the selected octave, to the n index corresponding
+    Parameter:
+    frequence: (float) Input frequency (Hz)
+    octave: (int), 0 to get the selected frequency
+    freqaxe: (float array), frequencies axe
+    rate: (int), sample rate of audio file
+    return: (int) frequency n index
+    """
     freq_ind = frequence * np.power(2, octave)  # look for the selected freq and octave
     freq_ind = freq_ind + freqaxe[0]  # add a starting frequency as constant, fix for trunc function
     freq_ind = freq_ind * len(freqaxe) / rate  #transform frequence into indexes
@@ -429,7 +443,7 @@ def Show_fft(Spectre,Freq,notescale,peaks, file_path=None): #need to implemant m
     if (len(peaks) != 1):
         plt.plot(Freq[peaks], Spectre[peaks], 'x')
 
-    plt.show()
+    plt.show(block = False)
 
 
 def get_sample_filepath(real_scale,sample_number,type_of_sample):
@@ -483,6 +497,12 @@ def hz_to_note (frequency):
     return note
 
 def hz_to_note_array (frequencies_array):
+    """
+        Gave the nearest notes correspondings for a frequencies array (Hz)
+        Parameter:
+        frequencies_array: (float array) Input frequency (Hz)
+        return: (str array) notes array
+        """
     notes_array = []
     for n in range(0, len(frequencies_array)):
         notes_array.append(hz_to_note(frequencies_array[n]))
@@ -490,6 +510,14 @@ def hz_to_note_array (frequencies_array):
 
 
 def sort_peaks(peaks_value,peaks_hz):
+    """
+    Sort detected peaks by value,sort a reorder peaks_value and peaks_note too
+    Parameter:
+    peaks_value: (float array) detected peaks power
+    peaks_hz: (float array) detected peaks localisation in hz
+    return:
+    (float array) sorted peaks_value, (float array) sorted peaks_hz, (str array) sorted peaks_char
+    """
     max_value_index=np.argsort(peaks_value)
     max_value_index=max_value_index[::-1]
     peaks_value=np.sort(peaks_value)
@@ -505,6 +533,14 @@ def sort_peaks(peaks_value,peaks_hz):
 
 
 def unique_peaks(peaks_value,peaks_note):
+    """
+    get array of unique notes from peaks, classing them by cumulating power for every same note
+    Parameter:
+    peaks_value: (float array) detected peaks power
+    peaks_note: (str array) detected peaks notes equivalent
+    return:
+    (float array) new_peak_value,(str array) new_peaks_char
+        """
     listscale=listscale_from_dict()
     new_peaks_value=np.zeros(len(listscale))
     new_peaks_note = []
