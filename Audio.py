@@ -392,7 +392,7 @@ def Print_fft(Spectre,Freq,notescale,peaks, file_path=None): #need to implemant 
         plt.savefig(file_path + "/spectrogram.png", dpi=100)
         plt.clf()
 
-def Show_fft(Spectre,Freq,notescale,peaks, file_path=None): #need to implemant marker with the good note on the graph
+def Show_fft(Spectre,Freq,notescale,peaks, blocking): #need to implemant marker with the good note on the graph
     listscale = listscale_from_dict()
     scale=0
     for i in range (0,len(listscale)):
@@ -426,7 +426,7 @@ def Show_fft(Spectre,Freq,notescale,peaks, file_path=None): #need to implemant m
 
     plt.grid()
     maxfft=np.max(Spectre)
-    plt.xlim(60,1000)
+    plt.xlim(60,2000)
     for n in  Biggoodnote:
         plt.vlines(Biggamme[n], 0, maxfft, linestyles="dotted", colors="green")
         plt.text(Biggamme[n], 0, Biglistscale[n], color="green", fontsize=12)
@@ -443,7 +443,7 @@ def Show_fft(Spectre,Freq,notescale,peaks, file_path=None): #need to implemant m
     if (len(peaks) != 1):
         plt.plot(Freq[peaks], Spectre[peaks], 'x')
 
-    plt.show(block = False)
+    plt.show(block =blocking)
 
 
 def get_sample_filepath(real_scale,sample_number,type_of_sample):
@@ -568,6 +568,7 @@ def unique_peaks(peaks_value,peaks_note):
 
 class Audio :
     spectrum = 0
+    sum_spectrum = 0
     frequencies = 0
     rate = 0
     real_scale=0
@@ -580,7 +581,8 @@ class Audio :
     peaks_notes=0
     max_notes_number=0
     max_notes_char = []
-
+    time=0
+    windows_time=0
     def __init__(self, filename, output_directory, scale):
         self.real_scale=scale
         self.rate, self.sample = scipy.io.wavfile.read(filename, mmap=False)
@@ -602,6 +604,12 @@ class Audio :
         self.spectrum,self.frequencies =get_fft(self.sample, self.rate)
         self.spectrum,self.frequencies =fft_trunc(self.spectrum,self.frequencies,0,18000)
 
+    def stft(self,windows_time,where_time):
+        self.spectrum, self.frequencies = get_stft(self.sample,windows_time,where_time, self.rate)
+        self.spectrum, self.frequencies = fft_trunc(self.spectrum, self.frequencies, 0, 18000)
+        self.time=where_time
+        self.windows_time=windows_time
+
     def smooth_fft(self, smoothing_value):
         self.spectrum = scipy.ndimage.gaussian_filter1d(self.spectrum, smoothing_value, order=0)
 
@@ -612,6 +620,14 @@ class Audio :
         self.peaks_hz = self.frequencies[peaks]
         self.peaks_notes = hz_to_note_array(self.peaks_hz)
         self.unique_max_notes_power,self.unique_max_notes=unique_peaks(self.peaks_value,self.peaks_notes)
+
+    def find_peaks_and_unique_from_sum(self):
+        peaks, _ = find_peaks(self.sum_spectrum, height=max(self.spectrum) / 4)
+        self.peaks = peaks
+        self.peaks_value = self.sum_spectrum[peaks]
+        self.peaks_hz = self.frequencies[peaks]
+        self.peaks_notes = hz_to_note_array(self.peaks_hz)
+        self.unique_max_notes_power, self.unique_max_notes = unique_peaks(self.peaks_value, self.peaks_notes)
 
     def sort_peaks(self):
 
@@ -624,8 +640,11 @@ class Audio :
         self.max_notes_number=LettersToNumbers(self.max_notes_char)
 
 
-    def fft_show(self):
-        Show_fft(self.spectrum, self.frequencies, self.real_scale, self.peaks)
+    def fft_show(self, blocking):
+        Show_fft(self.spectrum, self.frequencies, self.real_scale, self.peaks, blocking)
+
+    def summed_stft_show(self, blocking):
+        Show_fft(self.sum_spectrum, self.frequencies, self.real_scale, self.peaks, blocking)
 
     def fft_print(self):
         Show_fft(self.spectrum, self.frequencies, self.real_scale, self.peaks, self.result_path)

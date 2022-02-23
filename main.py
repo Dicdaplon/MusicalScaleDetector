@@ -1,3 +1,4 @@
+
 from Audio import *
 from fretboardgtr import ScaleGtr
 from Scale import *
@@ -25,14 +26,15 @@ type_of_sample = "CleanGuitar"
 
 file_input=get_sample_filepath(real_scale,6,type_of_sample)
 print("file_input", file_input)
+
 Audio_Obj = Audio(file_input, real_scale)
-Audio_Obj.fft()
-Audio_Obj.smooth_fft(10)
+Audio_Obj.stft(0.2,5)
+Audio_Obj.smooth_fft(1)
 Audio_Obj.find_peaks_and_unique()
 Audio_Obj.sort_peaks()
 print(Audio_Obj.peaks_notes)
 print(Audio_Obj.peaks_value)
 print(Audio_Obj.unique_max_notes)
 print(Audio_Obj.unique_max_notes_power)
-Audio_Obj.fft_show()
+Audio_Obj.fft_show(True)
 
