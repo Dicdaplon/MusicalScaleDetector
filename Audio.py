@@ -1,4 +1,5 @@
 #Internal libraries
+import numpy as np
 
 from FFTfunction import *
 import os
@@ -26,50 +27,6 @@ def listscale_from_dict():
     for n in range(0,12):
         listscale.append(dict_notations_old[n]["english_notation"])
     return listscale
-
-def get_max_notes(filename): #usefull for full test of the method  FOR BOUBOU
-    """
-    get_max_notes computes a wav file and extract the notes
-    Parameter:
-    filename: wav file
-
-    return: list of detected notes
-    """
-
-    listscale=listscale_from_dict()
-    print("every note is associated to a number as :")
-    print(listscale)
-    print([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11])
-    print("For Example the Cmajor scale :")
-    print([0,2,4,5,7,9,11])
-
-    oursong= Audio(filename)
-    sample= oursong.sample
-    rate = oursong.rate
-    Spectre, Freq = get_fft(sample,rate)
-
-    Spectre = scipy.ndimage.gaussian_filter1d(Spectre, 15, order=0)  #smoothing the FFT
-
-    print('Size of Freq' ,str(len(Freq)))
-    print('This is Freq', Freq)
-
-    print('Size of spectre', str(len(Spectre)))
-    print('This is spectre', Spectre)
-
-    print("\n Power for every note : ")
-    scores = score_for_everynote(Spectre, Freq, rate, 10) #return a vector of energy detected for every notes (float)
-    for n in range(0, len(listscale)):
-        print(listscale[n]," ", scores[n],"     ")
-
-
-    scale = GetindexOfMaxNote(scores, 5)
-
-    print("\n note detected ", scale)
-    for n in range(0, len(scale)):
-        print(listscale[scale[n]])
-
-
-    return scale
 
 def note_frequencies_construct(): #construct in Hz every note C to B including the # notes
     """
@@ -109,129 +66,21 @@ def windows_hz_to_n(hz,freqaxe): #transform a windows in hz to a number of sampl
     return n
 
 
-def note_score(spectre, freq, rate, note, windows):  # return summed score for a note C,Cd,D...
-    listscale=listscale_from_dict()
-    gamme = note_frequencies_construct()  # all the normalize value, C to B (Do vers Si) in Hz
-    noteindex = listscale.index(note)  # reach for the indexes of the searched note (ex Cd -> 1)
-    powerscale = 0
-    n = noteindex
-    np.max(spectre)
-    spectre = spectre / np.max(spectre)
-    for i in range(0, 6):
-        freq_hz=gamme[n] * np.power(2, i)
-        windows_hz=0.0544*freq_hz-0.0404  #regression adjustement, the windows increase with frequency
-        windows=windows_hz_to_n(windows_hz, freq)
-        windows= int(np.round(windows/2))
-        freq_ind = frequence_to_index(gamme[n], i, freq,rate)  #need modification to doesn't take octave in parameter
-        moyennage = np.mean(spectre[freq_ind - windows:freq_ind + windows + 1]) #maybe be not usefull...
-        powerscale = powerscale + moyennage
-    return powerscale
 
-
-
-def score_for_everynote(spectre, freq,rate, windows):  # return vector of summed scores for each note C,Cd,D...
-    powersvector = np.zeros(12);
-
-    listscale=listscale_from_dict()
-    n = 0
-    for note in listscale:
-        powersvector[n] = note_score(spectre, freq, rate, note, 30)
-        n = n + 1
-    return powersvector
-
-def compare_with_known_scale (Scalein):
-    listscale=listscale_from_dict()
-    scoremax=0
-    nmax=0
-    for n in range(0,len(listscale)):
-        refscale=np.add([0,2,4,5,7,9,11],[n,n,n,n,n,n,n])
-        fundamentals=[refscale[0],refscale[2],refscale[4]]
-        refscale,fundamentals=circularyscale(refscale,fundamentals)
-        newscore=compare_vector(Scalein,refscale,fundamentals)
-        if (newscore > scoremax):
-            scoremax=newscore
-            nmax=n
-
-    return listscale[nmax]
-
-def compare_vector(our, ref, fundamentals):  # compare 2 scale array and return a bool of identical value  BAD
-    score = 0
-    fundaments_found = [0, 0, 0]
-    for n in range(0, len(our)):
-        for m in range(0, len(ref)):
-            ponderationRef = 1
-            if (our[n] == ref[m]):
-                if (ref[m] == fundamentals[0]):
-                    fundaments_found[0]=1
-                    ponderationRef = 10
-                if (ref[m] == fundamentals[1]):
-                    ponderationRef = 10
-                    fundaments_found[1] = 1
-                if (ref[m] == fundamentals[2]):
-                    ponderationRef = 10
-                    fundaments_found[2] = 1
-                if (np.sum(fundaments_found) == 3):
-                    ponderationRef = 100
-                ponderationScaleIn = 10 / ((n+1)*(n+1))  #score added decrease with order (power) off note
-                score = score + (10*ponderationScaleIn*ponderationRef)
-    return score
-
-
-def circularyscale(scale,fundamentals):  # transform scale a redondant value for the >11 (13 = 1, 12 = 0 )
+def circularyscale(scale):  # transform scale a redondant value for the >11 (13 = 1, 12 = 0 )
     for n in range(0, len(scale)):
         if (scale[n] > 11):
             scale[n] = scale[n] - 12
-    for n in range(0, len(fundamentals)):
-        if (fundamentals[n] > 11):
-            fundamentals[n] = fundamentals[n] - 12
-    scale = np.sort(scale)  #bad idea to sort everything ?
-    return scale,fundamentals
-
-
-def FindScale(our):  # return a vector of better correspondance with known scale
-    Scale = [0, 2, 4, 5, 7, 9, 11]
-    our = circularyscale(our)
-    sumscale = np.zeros(12)
-    for scaleN in range(0, 11):
-        newScale = circularyscale(Scale + scaleN * np.ones(len(Scale)))
-        result = BoolReturn(newScale, our)
-        sumscale[scaleN] = np.sum(result)
-
-    return sumscale
+    return scale
 
 
 
-def FindScaleFromvector(ScaleScoreVector):  # return a vector of better correspondance with known scale
-    SortedScaleindex = np.argsort(ScaleScoreVector)
-    SortedScaleindex = SortedScaleindex[::-1]
+def getscalelist(note):
     listscale=listscale_from_dict()
-    return listscale[SortedScaleindex[0]]
-
-
-def GetindexOfMaxNote(ChordsPowersScores, Numberofvalues):
-
-    Sortedindexs = np.argsort(ChordsPowersScores)  # return the indexes of sorted list (ascending)
-    Sortedindexs = Sortedindexs[::-1]  # indexes of the list (decreasing)
-    Sortedindexs = Sortedindexs[0:Numberofvalues]
-    return Sortedindexs
-
-
-def GetScale(filename):
-    rate, audio_data = scipy.io.wavfile.read(filename, mmap=False)
-    spectre, freq = get_fft(audio_data, rate)
-    # spectre,freq = fft_trunc(spectre,freq,80,800)
-    for i in range(0, 1):
-        spectre, freq = GaussianFilterFFT(spectre, freq, [1, 1, 1, 1, 1])
-
-    ChordsPowersScores =score_for_everynote(spectre, freq, 5)
-    listscale = ["C", "Cd", "D", "Dd", "E", "F", "Fd", "G", "Gd", "A", "Ad", "B"]
-    Sortedindexs = GetindexOfMaxNote(ChordsPowersScores, 7)
-
-    # Sortedindexs=np.sort(Sortedindexs)
-    result = FindScale(Sortedindexs)
-    result = FindScaleFromvector(result)
-
-    return result
+    index=find_in_str_list(note,listscale)
+    scale_numb=circularyscale(np.add([0, 2, 4, 5, 7, 9, 11],index))
+    scale_char= NumberToLetter(scale_numb)
+    return scale_char
 
 def find_in_str_list(ourstr,list_str):
     index=-1
@@ -246,6 +95,7 @@ def NumberToLetter(scale):
     letterscale = ["0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0"]
     for n in range(0, len(scale)):
         letterscale[n] = listscale[scale[n]]
+    letterscale=letterscale[0:len(scale)]
     return letterscale
 
 def LetterToNumber(note_str):
@@ -256,7 +106,6 @@ def LetterToNumber(note_str):
 
 def LettersToNumbers(scaleChar):
     listscale=listscale_from_dict()
-    print("Detected notes " , scaleChar)
 
     number_scale=np.zeros(len(scaleChar))
     for n in range(0,len(scaleChar)):
@@ -265,73 +114,6 @@ def LettersToNumbers(scaleChar):
         number_scale[n]=int(LetterToNumber(actual_str))
 
     return number_scale
-
-
-def predict_scale_show(filename, realscale, output_directory): #usefull for full test of the method
-    """
-            Compute the method to the end with print and graph
-            Parameter:
-            filename :  (str) filepath of the sample
-            realscale:  (str) groundtruth scale
-            return: (str) predicted scale
-            """
-    oursong= Audio(filename,realscale, output_directory)
-
-    oursong.fft()
-    oursong.smooth_fft(45)
-
-
-
-    scores = score_for_everynote(oursong.spectrum, oursong.frequencies,oursong.rate, 10)
-    listscale=listscale_from_dict()
-
-    for n in range(0, len(listscale)):
-        print(listscale[n]," ", scores[n],"     ")
-
-
-    scale = GetindexOfMaxNote(scores, 7)
-    for n in range(0, len(scale)):
-        print(listscale[scale[n]])
-
-
-    for n in range(0, len(listscale)):
-        refscale=np.add([0,2,4,5,7,9,11],[n, n, n, n, n, n, n])
-        fundamentals = [refscale[0], refscale[2], refscale[4]]
-        refscale,fundamentals=circularyscale(refscale,fundamentals)
-        scalescore = compare_vector(scale, refscale,fundamentals)
-
-
-    scaleChar = compare_with_known_scale(scale)
-    print("\n\n  The good scale is", scaleChar)
-    return scaleChar
-    oursong.fft_show()
-
-def predict_scale(filename, realscale, output_folder): #usefull for full test of the method
-    """
-        Compute the method to the end, no print, no show
-        Parameter:
-        filename :  (str) filepath of the sample
-        realscale:  (str) groundtruth scale
-        return: (str) predicted scale
-        """
-    oursong= Audio(filename,realscale, output_folder)
-    sample= oursong.sample
-    rate = oursong.rate
-    Spectre, Freq = get_fft(sample,rate)
-
-    Spectre = scipy.ndimage.gaussian_filter1d(Spectre, 15*3, order=0)
-
-    scores = score_for_everynote(Spectre, Freq,rate, 10)
-    listscale=listscale_from_dict()
-
-
-    scale = GetindexOfMaxNote(scores, 7)
-
-
-    scaleChar = compare_with_known_scale(scale)
-
-    return scaleChar
-
 
 
 def Print_fft(Spectre,Freq,notescale,peaks, file_path=None): #need to implemant marker with the good note on the graph
@@ -563,9 +345,80 @@ def unique_peaks(peaks_value,peaks_note):
 
     return new_peaks_value, new_peaks_note2
 
+def scale_compare_score (charin,charref) :
+    score =0
+    for n in range (0,len(charin)):
+        if(charin[n] in charref):
+            score=score+(10/(n+1))
+    fundamentals=[charref[0],charref[2],charref[4]]
+    for n in range(0,len(fundamentals)):
+        if(fundamentals[0] in charin):
+            score = score+3
+    return score
+
+def scales_compares_scores (charin):
+    scale_scores = np.zeros(11)
+    for n in range(0, 11):
+        refscale = np.add([0, 2, 4, 5, 7, 9, 11], n)
+        fund = [refscale[0], refscale[2], refscale[4]]
+        refscale= circularyscale(refscale)
+        scale_scores[n] = scale_compare_score(charin, NumberToLetter(refscale))
+    max_scores_index= np.argsort(scale_scores)
+    max_scores_index=max_scores_index[::-1]
+    listscale=listscale_from_dict()
+    predicted_scale= listscale[max_scores_index[0]]
+    return scale_scores, predicted_scale
 
 
+def stft_live(file_input,type_of_sample,real_scale,windowstime,incremanttime):
+    """
+    Simulation of live chord solving
+    Parameters :
+    file_input:(str) path to the input file
+    type_of_sample : (str) type of the sample
+    real_scale: (str)  groundtruth_scale
+    windonws_time : (float) time for every sample in the stft (s)
+    incremanttime: speed of the windows along the sample (s, if < windows = overlapping)
+    return :
+    None
+    """
+    Audio_Obj = Audio(file_input, real_scale)
+    max_n=   int((len(Audio_Obj.sample)/Audio_Obj.rate )-(2*windowstime))
+    max_n= int(max_n/incremanttime)
+    for incremant in range(0,max_n):
+        Audio_Obj.stft(windowstime,windowstime+(incremant*incremanttime))
+        seuil=(0.1)*np.max(Audio_Obj.spectrum)
+        Audio_Obj.spectrum=Audio_Obj.spectrum*(Audio_Obj.spectrum> seuil)
+        Audio_Obj.smooth_fft(10)
+        Audio_Obj.sum_spectrum=Audio_Obj.sum_spectrum+Audio_Obj.spectrum
+        Audio_Obj.find_peaks_and_unique_from_sum()
+        print("Audio_Obj.unique_max_notes_power",Audio_Obj.unique_max_notes_power)
+        plt.clf()
+        #Audio_Obj.summed_stft_show(False)
+        time =np.round(1+(incremant*incremanttime),decimals=2)
+        plt.title("Time "+ str(time) +" s, "+ str(windowstime) +"s windows, increment every "+ str(incremanttime)+ "s ")
+        max_plot_y=np.max(Audio_Obj.sum_spectrum)
 
+        plt.text(230, 7*max_plot_y/8, "Pur " +type_of_sample+ real_scale+" Sample", fontsize=20)
+        listx=[0,7,17,27,35,50,68,86,100,125,160,195]
+        refscale = getscalelist(real_scale)
+        for n in range(0, len(Audio_Obj.unique_max_notes)):
+            x=60+ listx[n]
+            if Audio_Obj.unique_max_notes[n] in refscale:
+                plt.text(x, max_plot_y , Audio_Obj.unique_max_notes[n], fontsize=20,color="green")
+            else:
+                plt.text(x, max_plot_y, Audio_Obj.unique_max_notes[n], fontsize=20, color="red")
+
+        listx = [0,70, 140, 190,270, 350, 440,540,650,760,870]
+        refscale=getscalelist(real_scale)
+        for n in range(0,len(refscale)):
+            x=listx[n]
+            plt.text(500+x, max_plot_y, refscale[n], fontsize=20, color="g")
+        scalesscores, predicted_scale= scales_compares_scores(Audio_Obj.unique_max_notes[0:8])
+        plt.text(230, 6*max_plot_y / 8, "Predicted Major Scale : "+ predicted_scale, fontsize=20)
+        Audio_Obj.summed_stft_show(False)
+        plt.pause(0.03)
+    Audio_Obj.summed_stft_show(True)
 class Audio :
     spectrum = 0
     sum_spectrum = 0
@@ -583,6 +436,7 @@ class Audio :
     max_notes_char = []
     time=0
     windows_time=0
+    unique_max_notes_scale=0
     def __init__(self, filename, output_directory, scale):
         self.real_scale=scale
         self.rate, self.sample = scipy.io.wavfile.read(filename, mmap=False)
@@ -602,11 +456,11 @@ class Audio :
 
     def fft(self):
         self.spectrum,self.frequencies =get_fft(self.sample, self.rate)
-        self.spectrum,self.frequencies =fft_trunc(self.spectrum,self.frequencies,0,18000)
+        self.spectrum,self.frequencies =fft_trunc(self.spectrum,self.frequencies,0,8000)
 
     def stft(self,windows_time,where_time):
         self.spectrum, self.frequencies = get_stft(self.sample,windows_time,where_time, self.rate)
-        self.spectrum, self.frequencies = fft_trunc(self.spectrum, self.frequencies, 0, 18000)
+        self.spectrum, self.frequencies = fft_trunc(self.spectrum, self.frequencies, 0, 8000)
         self.time=where_time
         self.windows_time=windows_time
 
@@ -620,6 +474,7 @@ class Audio :
         self.peaks_hz = self.frequencies[peaks]
         self.peaks_notes = hz_to_note_array(self.peaks_hz)
         self.unique_max_notes_power,self.unique_max_notes=unique_peaks(self.peaks_value,self.peaks_notes)
+        self.unique_max_notes_scale = LettersToNumbers(self.unique_max_notes)
 
     def find_peaks_and_unique_from_sum(self):
         peaks, _ = find_peaks(self.sum_spectrum, height=max(self.spectrum) / 4)
@@ -628,6 +483,7 @@ class Audio :
         self.peaks_hz = self.frequencies[peaks]
         self.peaks_notes = hz_to_note_array(self.peaks_hz)
         self.unique_max_notes_power, self.unique_max_notes = unique_peaks(self.peaks_value, self.peaks_notes)
+        self.unique_max_notes_scale = LettersToNumbers(self.unique_max_notes)
 
     def sort_peaks(self):
 

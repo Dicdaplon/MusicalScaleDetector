@@ -59,58 +59,11 @@ def get_summed_stft(audio_data, windows_time, rate):
 def fft_trunc(power, axes, StartFreq, EndFreq):  # need a rewrite of the other part to work properly
     indexStart = int(np.round(StartFreq / (axes[1])))
     indexEnd = int(np.round(EndFreq / (axes[1])))
-    print(indexStart)
-    print(indexEnd)
     axes = axes[indexStart:indexEnd]
     power = power[indexStart:indexEnd]
     return power, axes
 
 
-def normalizeFFT(spectre, axes):  # not working great for now
-    lowfreqmean = np.mean(spectre[0:int(len(spectre) / 3)])
-    highfreqmean = np.mean(spectre[int(len(spectre) * 2 / 3):len(spectre)])
-    pente = (highfreqmean - lowfreqmean) / (len(spectre) - 0)
-    for n in range(0, len(spectre)):
-        spectre[n] = spectre[n] - (pente * n)
-    return spectre, axes
-
-#### POC
-
-"""
-file_input="E:\PycharmProject\JohnnyBGoode.wav"
-real_scale="A#"
-Audio_Obj = Audio(file_input, real_scale)
-for incremant in range(0,400):
-    Audio_Obj.stft(0.6,1+(incremant/10))
-    Audio_Obj.smooth_fft(30)
-    Audio_Obj.sum_spectrum=Audio_Obj.sum_spectrum+Audio_Obj.spectrum
-    Audio_Obj.find_peaks_and_unique_from_sum()
-    plt.clf()
-    Audio_Obj.summed_stft_show(False)
-    plt.title("Time "+ str(1+(incremant/10)) +" s, "+ str(0.4) +"s windows, increment every "+ str(1/10)+ "s ")
-    max_plot_y=np.max(Audio_Obj.sum_spectrum)
-    plt.text(80, max_plot_y, "Seven most powerfull notes", fontsize=20)
-    plt.text(80, max_plot_y-250, Audio_Obj.unique_max_notes[0], fontsize=20)
-    plt.text(100, max_plot_y-250, Audio_Obj.unique_max_notes[1], fontsize=20)
-    plt.text(120, max_plot_y-250, Audio_Obj.unique_max_notes[2], fontsize=20)
-    plt.text(140, max_plot_y-250, Audio_Obj.unique_max_notes[3], fontsize=20)
-    plt.text(170,max_plot_y-250, Audio_Obj.unique_max_notes[4], fontsize=20)
-    plt.text(210, max_plot_y - 250, Audio_Obj.unique_max_notes[5], fontsize=20)
-    plt.text(240, max_plot_y - 250, Audio_Obj.unique_max_notes[6], fontsize=20)
-
-    plt.text(300, max_plot_y-400, "Pur " +type_of_sample+ real_scale+" Sample", fontsize=20)
-
-
-    plt.text(700, max_plot_y, "Real Note in scale", fontsize=20)
-    plt.text(700, max_plot_y - 250, "D", fontsize=20)
-    plt.text(850, max_plot_y - 250, "E", fontsize=20)
-    plt.text(970, max_plot_y - 250, "F#", fontsize=20)
-    plt.text(1180, max_plot_y - 250, "G", fontsize=20)
-    plt.text(1300, max_plot_y - 250, "A", fontsize=20)
-    plt.text(1600, max_plot_y - 250, "B", fontsize=20)
-    plt.text(1800, max_plot_y - 250, "C#", fontsize=20)
-    plt.pause(0.03)
-""""
 
 
 
