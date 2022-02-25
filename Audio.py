@@ -419,6 +419,8 @@ def stft_live(file_input,type_of_sample,real_scale,windowstime,incremanttime):
         Audio_Obj.summed_stft_show(False)
         plt.pause(0.03)
     Audio_Obj.summed_stft_show(True)
+
+
 class Audio :
     spectrum = 0
     sum_spectrum = 0
@@ -438,6 +440,10 @@ class Audio :
     windows_time=0
     unique_max_notes_scale=0
     def __init__(self, filename, output_directory, scale):
+        """
+        Initialize with output file path
+        Create an audio object with sample (array) and rate (int)
+        """
         self.real_scale=scale
         self.rate, self.sample = scipy.io.wavfile.read(filename, mmap=False)
 
@@ -451,21 +457,43 @@ class Audio :
         self.result_path = "./" + self.output_directory + self.file_name
 
     def __init__(self, filename, scale):
+        """
+        Initialize an audi object without output path
+        Create an audio object with sample (array) and rate (int)
+        """
         self.real_scale = scale
         self.rate, self.sample = scipy.io.wavfile.read(filename, mmap=False)
 
-    def fft(self):
+    def fft(self,smoothing):
+        """
+        Compute and save the fft of the audio sample
+        Parameters :
+        smoothing :(int) value of gaussian 1D smoothing
+        return :
+        spectrum: (float array) Power Spectrum
+        frequencies: (float array) array with corresponding frequencies of fft
+        """
         self.spectrum,self.frequencies =get_fft(self.sample, self.rate)
+        self.spectrum = scipy.ndimage.gaussian_filter1d(self.spectrum, smoothing, order=0)
         self.spectrum,self.frequencies =fft_trunc(self.spectrum,self.frequencies,0,8000)
 
-    def stft(self,windows_time,where_time):
+
+    def stft(self,windows_time,where_time,smoothing):
+        """
+            Compute and save the short time windowed fft of the audio sample
+            Parameters :
+            windows_time : (float) size of the windows in s
+            where_time : (float) temporal location of the windows in s
+            smoothing :(int) value of gaussian 1D smoothing
+            return :
+            spectrum: (float array) Power Spectrum
+            frequencies: (float array) array with corresponding frequencies of fft
+                """
         self.spectrum, self.frequencies = get_stft(self.sample,windows_time,where_time, self.rate)
+        self.spectrum = scipy.ndimage.gaussian_filter1d(self.spectrum, smoothing, order=0)
         self.spectrum, self.frequencies = fft_trunc(self.spectrum, self.frequencies, 0, 8000)
         self.time=where_time
         self.windows_time=windows_time
-
-    def smooth_fft(self, smoothing_value):
-        self.spectrum = scipy.ndimage.gaussian_filter1d(self.spectrum, smoothing_value, order=0)
 
     def find_peaks_and_unique(self):
         peaks, _ = find_peaks(self.spectrum, height=max(self.spectrum) / 4)
@@ -497,6 +525,12 @@ class Audio :
 
 
     def fft_show(self, blocking):
+        """"
+        Show a graph with FFT and scale information
+        Parameters:
+        blocking : (Boolean) True for stopping the program when plotting
+        return : None
+        """
         Show_fft(self.spectrum, self.frequencies, self.real_scale, self.peaks, blocking)
 
     def summed_stft_show(self, blocking):

@@ -1,4 +1,3 @@
-
 from Audio import *
 from fretboardgtr import ScaleGtr
 from Scale import *
