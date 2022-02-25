@@ -4,7 +4,7 @@ import numpy as np
 from FFTfunction import *
 import os
 from pathlib import Path
-
+from scipy import signal
 
 dict_notations_old = {
             0: {"english_notation": 'C', "latin_notation": 'Do'},
@@ -370,7 +370,7 @@ def scales_compares_scores (charin):
     return scale_scores, predicted_scale
 
 
-def stft_live(file_input,type_of_sample,real_scale,windowstime,incremanttime):
+def stft_live(file_input,type_of_sample,real_scale,windowstime,incremanttime, smoothing):
     """
     Simulation of live chord solving
     Parameters :
@@ -383,13 +383,16 @@ def stft_live(file_input,type_of_sample,real_scale,windowstime,incremanttime):
     None
     """
     Audio_Obj = Audio(file_input, real_scale)
+
+    sos = signal.butter(1, 400, 'hp', fs=44100, output='sos')
+    Audio_Obj.sample = signal.sosfilt(sos, Audio_Obj.sample)
+
     max_n=   int((len(Audio_Obj.sample)/Audio_Obj.rate )-(2*windowstime))
     max_n= int(max_n/incremanttime)
     for incremant in range(0,max_n):
-        Audio_Obj.stft(windowstime,windowstime+(incremant*incremanttime))
+        Audio_Obj.stft(windowstime,windowstime+(incremant*incremanttime),smoothing)
         seuil=(0.1)*np.max(Audio_Obj.spectrum)
         Audio_Obj.spectrum=Audio_Obj.spectrum*(Audio_Obj.spectrum> seuil)
-        Audio_Obj.smooth_fft(10)
         Audio_Obj.sum_spectrum=Audio_Obj.sum_spectrum+Audio_Obj.spectrum
         Audio_Obj.find_peaks_and_unique_from_sum()
         print("Audio_Obj.unique_max_notes_power",Audio_Obj.unique_max_notes_power)
