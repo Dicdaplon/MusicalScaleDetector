@@ -1,19 +1,3 @@
-import unittest
-import sklearn
-import scipy
-import scipy
-from scipy.fft import fft, ifft
-import matplotlib.pyplot as plt
-from matplotlib.pyplot import figure
-import numpy as np
-from scipy.io import wavfile
-import scipy.io
-
-
-
-from FFTfunction import *
-from Audio import *
-
 
 
 def TEST_score_for_everynote():

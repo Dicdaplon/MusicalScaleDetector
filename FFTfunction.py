@@ -1,13 +1,6 @@
-import sklearn
-import scipy
-import scipy
-from scipy.fft import fft, ifft
-import matplotlib.pyplot as plt
-from matplotlib.pyplot import figure
+
 import numpy as np
-from scipy.io import wavfile
-import scipy.io
-from scipy.signal import find_peaks
+from scipy.fft import fft
 
 
 

@@ -1,6 +1,3 @@
-from scipy.io import wavfile
-import scipy.io
-
 
 def little_sample_generator(filenamein,timeofeach,pathout,note):
 
