@@ -1,14 +1,7 @@
-import sklearn
-import scipy
-import scipy
-from scipy.fft import fft, ifft
-import matplotlib.pyplot as plt
-from matplotlib.pyplot import figure
+
 import numpy as np
-from scipy.io import wavfile
-import scipy.io
-from Class import *
-from Function import *
+from scipy.fft import fft
+
 
 
 def get_fft(audio_data, rate):
@@ -87,6 +80,7 @@ def get_summed_stft(audio_data, windows_time, rate):
 
 ########## Deprecated or not working function
 
+<<<<<<< HEAD
 def fft_trunc(spectrum, freq_axes, StartFreq, EndFreq):  # need a rewrite of the other part to work properly
     """
     trunc the spectrum and frequence axes to choosen value
@@ -116,6 +110,16 @@ def normalizeFFT(spectre, axes):  # not working great for now
         spectre[n] = spectre[n] - (pente * n)
     return spectre, axes
 
+=======
+def fft_trunc(power, axes, StartFreq, EndFreq):  # need a rewrite of the other part to work properly
+    indexStart = int(np.round(StartFreq / (axes[1])))
+    indexEnd = int(np.round(EndFreq / (axes[1])))
+    axes = axes[indexStart:indexEnd]
+    power = power[indexStart:indexEnd]
+    return power, axes
+
+
+>>>>>>> dev_scale_processing
 
 
 
