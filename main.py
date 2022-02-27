@@ -6,13 +6,16 @@ real_scale="C"
 Type="CleanGuitar"
 sample_number=4
 
+
+
 file_input= get_sample_filepath(real_scale,sample_number,Type)
 
 Audio_obj= Audio(file_input,real_scale)
 Audio_obj.spectrum_process()
-Audio_obj.pitch_recognition()
+Audio_obj.process_peaks()
+Audio_obj.process_pitches("max")
 
-Audio_obj.sort_peaks("value")
+
 #Audio_obj.fft_show(True)
 
 output="\outputs"

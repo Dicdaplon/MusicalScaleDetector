@@ -34,7 +34,7 @@ def Print_fft(Spectre,Freq,notescale,peaks, file_path=None): #need to implemant 
     Biggoodnote=goodnote
     Bigbadnote=badnote
 
-    for numberofscale in range(0,3):
+    for numberofscale in range(0,5):
         gamme=gamme*2
         Biggamme = np.concatenate([Biggamme, gamme])
         Biglistscale=np.concatenate([Biglistscale,listscale])
@@ -45,7 +45,7 @@ def Print_fft(Spectre,Freq,notescale,peaks, file_path=None): #need to implemant 
 
     plt.grid()
     maxfft=np.max(Spectre)
-    plt.xlim(60,1000)
+    plt.xlim(60,2000)
     for n in  Biggoodnote:
         plt.vlines(Biggamme[n], 0, maxfft, linestyles="dotted", colors="green")
         plt.text(Biggamme[n], 0, Biglistscale[n], color="green", fontsize=12)
@@ -92,7 +92,7 @@ def Show_fft(Spectre,Freq,notescale,peaks, blocking): #need to implemant marker 
     Biggoodnote=goodnote
     Bigbadnote=badnote
 
-    for numberofscale in range(0,3):
+    for numberofscale in range(0,5):
         gamme=gamme*2
         Biggamme = np.concatenate([Biggamme, gamme])
         Biglistscale=np.concatenate([Biglistscale,listscale])
@@ -180,6 +180,7 @@ def hz_to_note_and_octave (frequency):
     Parameter:
     frequency :  (float) Input freqency in Hz
     return: (str) nearest note
+    return: (int) octave of the note
     """
     listscale = listscale_from_dict()
     limit_of_octave1=(61.7+65.4)/2
@@ -203,11 +204,14 @@ def hz_to_note_array (frequencies_array):
         Parameter:
         frequencies_array: (float array) Input frequency (Hz)
         return: (str array) notes array
+        return : (int array) correponding octaves for each notes
         """
     notes_array = []
+    octaves= np.zeros(len(frequencies_array))*-1
     for n in range(0, len(frequencies_array)):
-        notes_array.append(hz_to_note(frequencies_array[n]))
-    return notes_array
+        note, octaves[n]=hz_to_note_and_octave(frequencies_array[n])
+        notes_array.append(note)
+    return notes_array, octaves
 
 
 
@@ -270,21 +274,30 @@ def stft_live(file_input,type_of_sample,real_scale,windowstime,incremanttime, sm
 
 
 class Audio :
-    #Temporal
+    #Temporal related
     rate = 0
     time =0
-    #FFT related
+    #FFT and frequencies related
     spectrum = 0
     sum_spectrum = 0
     frequencies = 0
     windows_time = 0
-    #Peaks related
+    #Peaks related (hz, C4, F#3...etc)
     peaks = np.ones(1)
-    peaks_value = 0
+    peaks_values = 0
     peaks_hz = 0
     peaks_notes = 0
-    #pitchs related
-    unique_max_notes = 0
+    peaks_octaves=0
+    # Unique peaks per pitch
+    #pitches related (C4,F#4...with only one detection par peak)
+    pitches = 0
+    pitches_power=0
+    pitches_octave=0
+    # notes related (C,F, no octave information)
+    notes=0
+    notes_power=0
+    notes_number=0
+
     unique_max_notes_power = 0
     unique_max_notes_scale = 0
     max_notes_number=0
@@ -371,19 +384,17 @@ class Audio :
         self.windows_time=windows_time
 
 
-    def find_peaks_and_unique(self):
+    def process_peaks(self):
         peaks, _ = find_peaks(self.spectrum, height=max(self.spectrum) / 4)
         self.peaks=peaks
-        self.peaks_value=self.spectrum[peaks]
+        self.peaks_values=self.spectrum[peaks]
         self.peaks_hz = self.frequencies[peaks]
-        self.peaks_notes = hz_to_note_array(self.peaks_hz)
-        self.unique_max_notes_power,self.unique_max_notes=unique_peaks(self.peaks_value,self.peaks_notes)
-        self.unique_max_notes_scale = LettersToNumbers(self.unique_max_notes)
+        self.peaks_notes, self.peaks_octaves = hz_to_note_array(self.peaks_hz)
 
     def find_peaks_and_unique_from_sum(self):
         peaks, _ = find_peaks(self.sum_spectrum, height=max(self.spectrum) / 4)
         self.peaks = peaks
-        self.peaks_value = self.sum_spectrum[peaks]
+        self.peaks_values = self.sum_spectrum[peaks]
         self.peaks_hz = self.frequencies[peaks]
         self.peaks_notes = hz_to_note_array(self.peaks_hz)
         self.unique_max_notes_power, self.unique_max_notes = unique_peaks(self.peaks_value, self.peaks_notes)
@@ -398,12 +409,45 @@ class Audio :
         """
         if sortby == "hz":
             reflist=self.peaks_hz
-            self.peaks_hz, self.peaks_value = sort_2_list(reflist, self.peaks_value,"ascending")
+            self.peaks_hz, self.peaks_values = sort_2_list(reflist, self.peaks_values,"ascending")
             self.peaks_hz, self.peaks_notes = sort_2_list(reflist, self.peaks_notes,"ascending")
         if sortby== "value":
             reflist = self.peaks_value
-            self.peaks_value, self.peaks_hz = sort_2_list(reflist, self.peaks_hz,"descending")
-            self.peaks_value, self.peaks_notes = sort_2_list(reflist, self.peaks_notes,"descending")
+            self.peaks_values, self.peaks_hz = sort_2_list(reflist, self.peaks_hz,"descending")
+            self.peaks_values, self.peaks_notes = sort_2_list(reflist, self.peaks_notes,"descending")
+    def process_pitches(self,close_peaks_strategy):
+
+        def np_pop(nplist,n) :
+            nplist= np.concatenate([nplist[0:n], nplist[n+1:len(nplist)] ]  )
+            return nplist
+
+        self.sort_peaks("hz")
+        notes=self.peaks_notes
+        octaves=self.peaks_octaves
+        values=self.peaks_values
+        if close_peaks_strategy == "max":
+            n=0
+            while(1):
+                if ( n >= len(notes)-1):
+                    break
+                same_pitch = (notes[n] == notes[n+1])
+                same_octave = (octaves[n] == octaves[n+1])
+                while ( same_pitch and same_octave):
+                    if (n >= len(notes)-1):
+                        break
+                    new_value= np.max([  values[n],values[n+1] ])
+                    notes.pop(n+1)
+                    values=np_pop(values,n+1)
+                    octaves=np_pop(octaves,n+1)
+                    values[n]=new_value
+                    same_pitch = (notes[n] == notes[n + 1])
+                    same_octave = (octaves[n] == octaves[n + 1])
+                n=n+1
+
+
+        self.pitches=notes
+        self.pitches_octave=octaves
+        self.pitches_power= values
 
 
     def find_max_notes_peaks(self):
@@ -420,7 +464,7 @@ class Audio :
         blocking : (Boolean) True for stopping the program when plotting
         return : None
         """
-        Show_fft(self.spectrum, self.frequencies, self.real_scale, self.peaks, blocking)
+        Show_fft(self.spectrum, self.frequencies, self.real_scale, self.peaks,blocking)
 
     def summed_stft_show(self, blocking):
         Show_fft(self.sum_spectrum, self.frequencies, self.real_scale, self.peaks, blocking)
