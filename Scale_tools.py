@@ -64,7 +64,7 @@ def note_frequencies_construct(): #construct in Hz every note C to B including t
     return: (float) array of frequencies, size 12
     """
     gamme = np.zeros(12)
-    gamme[0] = 65.4  # C (Do) at 32.7 Hz
+    gamme[0] = 32.7  # C (Do) at 32.7 Hz
 
     for i in range(1, len(gamme)): #construct every note in a chromatic scale
         gamme[i] = 1.05946 * gamme[i - 1]

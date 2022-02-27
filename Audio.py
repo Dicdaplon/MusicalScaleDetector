@@ -174,6 +174,29 @@ def hz_to_note (frequency):
 
     return note
 
+def hz_to_note_and_octave (frequency):
+    """
+    Gave the nearest note corresponding to a frequency in Hz
+    Parameter:
+    frequency :  (float) Input freqency in Hz
+    return: (str) nearest note
+    """
+    listscale = listscale_from_dict()
+    limit_of_octave1=(61.7+65.4)/2
+    startfrequency=frequency
+    while(frequency>limit_of_octave1):
+        frequency=frequency/2
+    note_ref=note_frequencies_construct()
+    diff_with_ref=np.zeros(len(note_ref))
+
+    for n in range(0,len(note_ref)):
+        diff_with_ref[n]=np.abs(note_ref[n]-frequency)
+
+    sorted_diff_index=np.argsort(diff_with_ref)
+    note=listscale[sorted_diff_index[0]]
+    octave= int(np.round(np.log2((startfrequency / frequency))))
+    return note,octave
+
 def hz_to_note_array (frequencies_array):
     """
         Gave the nearest notes correspondings for a frequencies array (Hz)

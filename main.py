@@ -1,9 +1,10 @@
+import numpy as np
+
 from Audio import *
 
 real_scale="C"
 Type="CleanGuitar"
 sample_number=4
-
 
 file_input= get_sample_filepath(real_scale,sample_number,Type)
 
