@@ -24,6 +24,32 @@ def sort_peaks(peaks_value,peaks_hz):
     return new_peaks_value, new_peaks_hz, new_peaks_char
 
 
+def sort_peaks_hz(peaks_value,peaks_hz):
+    """
+    Sort detected peaks by value,sort a reorder peaks_value and peaks_note too
+    Parameter:
+    peaks_value: (float array) detected peaks power
+    peaks_hz: (float array) detected peaks localisation in hz
+    return:
+    (float array) sorted peaks_value, (float array) sorted peaks_hz, (str array) sorted peaks_char
+    """
+    max_value_index=np.argsort(peaks_value)
+    max_value_index=max_value_index[::-1]
+    peaks_value=np.sort(peaks_value)
+    new_peaks_value=peaks_value[::-1]
+
+    new_peaks_hz=np.zeros(len(peaks_hz))
+    for n in range(0,len(max_value_index)) :
+        new_peaks_hz[n]=peaks_hz[max_value_index[n]]
+
+    new_peaks_char=hz_to_note_array(new_peaks_hz)
+
+    return new_peaks_value, new_peaks_hz, new_peaks_char
+def unique_peaks_per_pitch(peaks, peak_sortedbyhz_pitch):
+    for n in range(0,len(sorted_peaks)):
+        if(peak_sortedbyhz_pitch[n]==peak_sortedbyhz_pitch[n+1]):
+            peak_sortedbyhz_pitch
+    print("Unique_peaks_per_pitchFunction not writed yet...")
 def unique_peaks(peaks_value,peaks_note):
     """
     get array of unique notes from peaks, classing them by cumulating power for every same note
@@ -37,11 +63,11 @@ def unique_peaks(peaks_value,peaks_note):
     new_peaks_value=np.zeros(len(listscale))
     new_peaks_note = []
     for n in range(0,len(listscale)) :
-        new_peaks_note.append(listscale[n])
+        new_peaks_note.append(listscale[n]) # add a str note (like "C")
         sum = 0
         for m in range(0,len(peaks_value)):
-            if listscale[n]== peaks_note[m]:
-                sum = sum+peaks_value[m]
+            if listscale[n]== peaks_note[m]: # if a peak_pitch (str) equal to the one in listscale (C)
+                sum = sum+peaks_value[m]    #add value
         new_peaks_value[n]=sum
 
     new_peaks_note2= []

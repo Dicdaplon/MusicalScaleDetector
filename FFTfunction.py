@@ -80,7 +80,7 @@ def get_summed_stft(audio_data, windows_time, rate):
 
 ########## Deprecated or not working function
 
-<<<<<<< HEAD
+
 def fft_trunc(spectrum, freq_axes, StartFreq, EndFreq):  # need a rewrite of the other part to work properly
     """
     trunc the spectrum and frequence axes to choosen value
@@ -100,26 +100,5 @@ def fft_trunc(spectrum, freq_axes, StartFreq, EndFreq):  # need a rewrite of the
     freq_axes = freq_axes[indexStart:indexEnd]
     spectrum = spectrum[indexStart:indexEnd]
     return spectrum, freq_axes
-
-
-def normalizeFFT(spectre, axes):  # not working great for now
-    lowfreqmean = np.mean(spectre[0:int(len(spectre) / 3)])
-    highfreqmean = np.mean(spectre[int(len(spectre) * 2 / 3):len(spectre)])
-    pente = (highfreqmean - lowfreqmean) / (len(spectre) - 0)
-    for n in range(0, len(spectre)):
-        spectre[n] = spectre[n] - (pente * n)
-    return spectre, axes
-
-=======
-def fft_trunc(power, axes, StartFreq, EndFreq):  # need a rewrite of the other part to work properly
-    indexStart = int(np.round(StartFreq / (axes[1])))
-    indexEnd = int(np.round(EndFreq / (axes[1])))
-    axes = axes[indexStart:indexEnd]
-    power = power[indexStart:indexEnd]
-    return power, axes
-
-
->>>>>>> dev_scale_processing
-
 
 

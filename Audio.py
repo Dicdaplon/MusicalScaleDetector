@@ -1,7 +1,6 @@
 #Internal library
 from FFTfunction import *
 from Scale import *
-from Scale_tools import *
 from Peaks_detection import *
 
 
@@ -308,7 +307,7 @@ class Audio :
         return : None
 
         """
-        self.prcess_fft(5)
+        self.process_fft(5)
 
     def pitch_recognition(self) :
         """
@@ -317,7 +316,7 @@ class Audio :
         return : None
         """
         self.find_peaks_and_unique()
-    def prcess_fft(self,smoothing):
+    def process_fft(self,smoothing):
         """
         Compute and save the fft of the audio sample
         Parameters :
@@ -367,9 +366,21 @@ class Audio :
         self.unique_max_notes_power, self.unique_max_notes = unique_peaks(self.peaks_value, self.peaks_notes)
         self.unique_max_notes_scale = LettersToNumbers(self.unique_max_notes)
 
-    def sort_peaks(self):
-
-        self.peaks_value,self.peaks_hz, self.peaks_notes=  sort_peaks(self.peaks_value, self.peaks_hz)
+    def sort_peaks(self,sortby):
+        """
+        Sort peaks pitch, value and hz consistently, by the choosen axes
+        Parameters:
+        sortby : (str "hz" or "value") sort hz ascending order, or value descending order
+        return: None
+        """
+        if sortby == "hz":
+            reflist=self.peaks_hz
+            self.peaks_hz, self.peaks_value = sort_2_list(reflist, self.peaks_value,"ascending")
+            self.peaks_hz, self.peaks_notes = sort_2_list(reflist, self.peaks_notes,"ascending")
+        if sortby== "value":
+            reflist = self.peaks_value
+            self.peaks_value, self.peaks_hz = sort_2_list(reflist, self.peaks_hz,"descending")
+            self.peaks_value, self.peaks_notes = sort_2_list(reflist, self.peaks_notes,"descending")
 
 
     def find_max_notes_peaks(self):

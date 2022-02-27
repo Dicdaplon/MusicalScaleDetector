@@ -15,6 +15,36 @@ dict_notations_old = {
             11: {"english_notation": 'B', "latin_notation": 'Si'},
         }
 
+def sort_2_list(listref,list2,sorttype):
+    """
+    Sort 2 list in a consistant way based on the sorted reflist
+    Maximum first
+    Parameters:
+    listref : (list of float,int ) reference list to sort
+    list2 : (list of float,int, str) second list to be arranged as the listref
+    return :
+    new_listref : sorted version of reflist
+    new_list2 : sorted version of list2
+    """
+
+    indexes = np.argsort(listref)
+    new_listref=np.sort(listref)
+
+
+    if type(list2[0]) is not type("A"):
+        new_list2=np.zeros(len(list2))
+        for n in range(0,len(list2)):
+            new_list2[n]=list2[indexes[n]]
+
+    if type(list2[0]) is type("A"):
+        new_list2 = []
+        for n in range(0, len(list2)):
+            new_list2.append(list2[indexes[n]])
+
+    if sorttype == "descending" :
+        new_listref = new_listref[::-1]
+        new_list2=new_list2[::-1]
+    return new_listref,new_list2
 
 def listscale_from_dict():
     """
