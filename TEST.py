@@ -1,19 +1,3 @@
-import unittest
-import sklearn
-import scipy
-import scipy
-from scipy.fft import fft, ifft
-import matplotlib.pyplot as plt
-from matplotlib.pyplot import figure
-import numpy as np
-from scipy.io import wavfile
-import scipy.io
-
-
-from Function import *
-from FFTfunction import *
-from Class import *
-
 
 
 def TEST_score_for_everynote():
@@ -67,24 +51,4 @@ def TEST_FFTtrunc():
     assert np.round(Axes[len(Axes) - 1]) == 600, "bad axes end in trunc function"
     assert len(Pow) == len(Axes), "Different lenght Power and FreqAxes after trunc function"
 
-
-def TEST_GaussianFilterFFT():
-    rate, audio_data = scipy.io.wavfile.read("Sinus440.wav", mmap=False)
-    Pow, Axes = get_fft(audio_data, rate)
-    MaxIndex = np.argsort(Pow)
-    MaxIndex = MaxIndex[::-1]
-    print(Axes[MaxIndex[0]])
-    # ponderation=[1,1,1,2,2,3,3,4,20,4,3,3,2,2,1,1,1]
-    # ponderation=[1,1,1]
-    ponderation = [1, 1, 1, 1, 1]
-    # ponderation=[1,1,1,1,1,1,1]
-    print(len(Axes))
-    print(len(Pow))
-    for i in range(0, 2):
-        Pow, Axes = GaussianFilterFFT(Pow, Axes, ponderation)
-    MaxIndex = np.argsort(Pow)
-    MaxIndex = MaxIndex[::-1]
-    print(len(Axes))
-    print(len(Pow))
-    print(Axes[MaxIndex[0]])
 

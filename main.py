@@ -1,35 +1,27 @@
-import sklearn
-import scipy
-import scipy
-from scipy.fft import fft, ifft
-import matplotlib.pyplot as plt
-from matplotlib.pyplot import figure
 import numpy as np
-from scipy.io import wavfile
-import scipy.io
 
-#Internal libraries
-from Function import *
-from FFTfunction import *
-from TEST import *
-from FunctionsScaleProcessing import Scale
-from Class import *
+from Audio import *
 
-scale=get_max_notes("Gclean.wav")
-print("\n scale", scale)
-
-#every_step_show("C.wav","C")
+real_scale="C"
+Type="CleanGuitar"
+sample_number=4
 
 
-new_scale = Scale(scale)
 
-list_intervals = new_scale.get_list_intervals()
+file_input= get_sample_filepath(real_scale,sample_number,Type)
 
-list_positions = new_scale.get_list_positions_in_scale()
+Audio_obj= Audio(file_input,real_scale)
+Audio_obj.spectrum_process()
+Audio_obj.process_peaks()
+Audio_obj.process_pitches("max")
 
-list_corresponding_scales = new_scale.get_list_corresponding_scales()
 
-list_english_notation = new_scale.get_list_english_notation()
+#Audio_obj.fft_show(True)
 
-new_scale.generate_fretboard_svg()
-
+output="\outputs"
+Scale_obj= Scale([0,2,4,5,7,9,11],file_input,output,'C')
+Scale_obj.get_list_intervals()
+Scale_obj.get_list_positions_in_scale()
+Scale_obj.get_list_corresponding_scales()
+Scale_obj.get_list_english_notation()
+Scale_obj.generate_fretboard_svg()
