@@ -154,11 +154,15 @@ def scale_compare_score (charin,charref) :
     score =0
     for n in range (0,len(charin)):
         if(charin[n] in charref):
-            score=score+(10/(n+1))
+            score_add=3
+            score=score+score_add
+        else:
+            score_add = -3
+            score = score + score_add
     fundamentals=[charref[0],charref[2],charref[4]]
     for n in range(0,len(fundamentals)):
         if(fundamentals[0] in charin):
-            score = score+3
+            score = score+0
     return score
 
 def scales_compares_scores (charin):

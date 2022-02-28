@@ -22,7 +22,9 @@ def get_fft(audio_data, rate):
     tfd = fft(echantillons)
     N = len(echantillons)
     spectre = np.absolute(tfd) * 2 / N
+    spectre = 20*np.log10(spectre)
     freq = np.arange(N) * 1.0 / T
+
     return spectre, freq
 
 

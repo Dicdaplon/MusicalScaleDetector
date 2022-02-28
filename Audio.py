@@ -119,7 +119,6 @@ def Show_fft(Spectre,Freq,notescale,peaks, blocking): #need to implemant marker 
     plt.plot(Freq, Spectre)
     if (len(peaks) != 1):
         plt.plot(Freq[peaks], Spectre[peaks], 'x')
-        print("peaks hz in show",Freq[peaks])
 
     plt.show(block =blocking)
 
@@ -343,7 +342,7 @@ class Audio :
         return : None
 
         """
-        self.process_fft(5)
+        self.process_fft(20)
 
     def pitch_recognition(self) :
         """
@@ -440,6 +439,8 @@ class Audio :
                     values=np_pop(values,n+1)
                     octaves=np_pop(octaves,n+1)
                     values[n]=new_value
+                    if (n >= len(notes)-1):
+                        break
                     same_pitch = (notes[n] == notes[n + 1])
                     same_octave = (octaves[n] == octaves[n + 1])
                 n=n+1
@@ -449,6 +450,11 @@ class Audio :
         self.pitches_octave=octaves
         self.pitches_power= values
 
+        reflist=self.pitches_power
+        self.pitches_power, self.pitches_octave = sort_2_list(reflist,self.pitches_octave, "descending")
+        self.pitches_power, self.pitches = sort_2_list(reflist, self.pitches, "descending")
+    def process_notes(self):
+        print("to do...")
 
     def find_max_notes_peaks(self):
 
